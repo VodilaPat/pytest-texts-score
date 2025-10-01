@@ -1,0 +1,10 @@
+site_name: pytest-texts-score
+site_description: Texts content similarity scoring plugin
+site_author: Patrik Vodila
+
+theme: readthedocs
+
+repo_url: https://github.com/VodilaPat/pytest-texts-score
+
+pages:
+- Home: index.md
