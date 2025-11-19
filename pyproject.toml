@@ -9,7 +9,7 @@ name = "pytest-texts-score"
 description = "Texts content similarity scoring plugin"
 version = "0.1.0"
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.10,<4.0.0"
 authors = [
     { name = "Patrik Vodila", email = "vodilpat@cvut.fit.cz" },
 ]
@@ -24,8 +24,6 @@ classifiers = [
     "Topic :: Software Development :: Testing",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -36,8 +34,16 @@ classifiers = [
 ]
 dependencies = [
     "pytest>=8.4.2",
+    "requests (>=2.32.5,<3.0.0)",
+    "langchain-openai (==0.3.14)",
 ]
 [project.urls]
 Repository = "https://github.com/VodilaPat/pytest-texts-score"
 [project.entry-points.pytest11]
 texts-score = "pytest_texts_score.plugin"
+
+[tool.yapf]
+based_on_style = "google"
+
+# This ensures it matches Pylint's setting.
+column_limit = 80

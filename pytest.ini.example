@@ -1,0 +1,8 @@
+[pytest]
+llm_api_key=dddddddddddddddddddddddddddddddd
+llm_endpoint=https:.../
+llm_api_version=2024-08-01-preview
+llm_deployment=gpt-4-deployment
+llm_temperature=0
+llm_max_tokens=8192
+llm_model=gpt-4
