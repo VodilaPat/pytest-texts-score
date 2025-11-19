@@ -36,6 +36,8 @@ Requirements
 Installation
 ------------
 
+* TODO
+  
 You can install "pytest-texts-score" via `pip`_ from `PyPI`_::
 
     $ pip install pytest-texts-score
@@ -44,7 +46,23 @@ You can install "pytest-texts-score" via `pip`_ from `PyPI`_::
 Usage
 -----
 
-* TODO
+Direct import
+
+.. code-block:: python
+
+    from pytest_texts_score import texts_expect_f1_equal
+
+    def test_texts_expect_f1_equal():
+        texts_expect_f1_equal(`EXPECTED_TEXT`, `GIVEN_TEXT`, 1.0)
+
+Fixture
+
+.. code-block:: python
+
+    def test_f1_equal_with_fixture(texts_score):
+        texts_score["expect_f1_equal"](`EXPECTED_TEXT`,
+                                    `GIVEN_TEXT`,
+                                    target=1.0)
 
 Contributing
 ------------
