@@ -1,0 +1,56 @@
+name: Tests
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:   # allows manual triggering (full tests)
+
+jobs:
+  quick-tests:
+    name: Quick Tests
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'   # skip during manual run
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+
+      - name: Run quick tests
+        run: pytest .\tests\test_quick_test.py
+        # adjust marker if needed
+
+
+  full-tests:
+    name: Full Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'   # only run manually
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+
+      - name: Run full tests
+        run: pytest
