@@ -10,8 +10,8 @@ pytest-texts-score
     :target: https://pypi.org/project/pytest-texts-score
     :alt: Python versions
 
-.. image:: https://github.com/VodilaPat/pytest-texts-score/actions/workflows/main.yml/badge.svg
-    :target: https://github.com/VodilaPat/pytest-texts-score/actions/workflows/main.yml
+.. image:: https://github.com/VodilaPat/pytest-texts-score/actions/workflows/pypi.yml/badge.svg
+    :target: https://github.com/VodilaPat/pytest-texts-score/actions/workflows/pypi.yml
     :alt: See Build Status on GitHub Actions
 
 Texts content similarity scoring plugin
