@@ -82,21 +82,21 @@ def texts_expect_completeness_range(
 
 def texts_agg_completeness_min(expected: str,
                                given: str,
-                               target: float,
+                               lower_bound: float,
                                full_runs: int = 5,
                                each_question_runs: int = 1) -> None:
     """Alias for texts_agg_precision_min."""
-    texts_agg_precision_min(expected, given, target, full_runs,
+    texts_agg_precision_min(expected, given, lower_bound, full_runs,
                             each_question_runs)
 
 
 def texts_agg_completeness_max(expected: str,
                                given: str,
-                               target: float,
+                               upper_bound: float,
                                full_runs: int = 5,
                                each_question_runs: int = 1) -> None:
     """Alias for texts_agg_precision_max."""
-    texts_agg_precision_max(expected, given, target, full_runs,
+    texts_agg_precision_max(expected, given, upper_bound, full_runs,
                             each_question_runs)
 
 
@@ -161,20 +161,22 @@ def texts_expect_correctness_range(
 
 def texts_agg_correctness_min(expected: str,
                               given: str,
-                              target: float,
+                              lower_bound: float,
                               full_runs: int = 5,
                               each_question_runs: int = 1) -> None:
     """Alias for texts_agg_recall_min."""
-    texts_agg_recall_min(expected, given, target, full_runs, each_question_runs)
+    texts_agg_recall_min(expected, given, lower_bound, full_runs,
+                         each_question_runs)
 
 
 def texts_agg_correctness_max(expected: str,
                               given: str,
-                              target: float,
+                              upper_bound: float,
                               full_runs: int = 5,
                               each_question_runs: int = 1) -> None:
     """Alias for texts_agg_recall_max."""
-    texts_agg_recall_max(expected, given, target, full_runs, each_question_runs)
+    texts_agg_recall_max(expected, given, upper_bound, full_runs,
+                         each_question_runs)
 
 
 def texts_agg_correctness_median(expected: str,

@@ -124,24 +124,24 @@ def texts_expect_recall_range(
 
 def texts_agg_f1_min(expected: str,
                      given: str,
-                     target: float,
+                     lower_bound: float,
                      full_runs: int = 5,
                      each_question_runs: int = 1) -> None:
     check_input_runs(full_runs, each_question_runs)
     score = texts_agg_f1(expected, given, full_runs, each_question_runs,
                          AggType.MINIMUM)
-    test_score(score, 1.0, target, expected, given, ScoreType.F1)
+    test_score(score, 1.0, lower_bound, expected, given, ScoreType.F1)
 
 
 def texts_agg_f1_max(expected: str,
                      given: str,
-                     target: float,
+                     upper_bound: float,
                      full_runs: int = 5,
                      each_question_runs: int = 1) -> None:
     check_input_runs(full_runs, each_question_runs)
     score = texts_agg_f1(expected, given, full_runs, each_question_runs,
                          AggType.MAXIMUM)
-    test_score(score, target, 0.0, expected, given, ScoreType.F1)
+    test_score(score, upper_bound, 0.0, expected, given, ScoreType.F1)
 
 
 def texts_agg_f1_median(expected: str,
@@ -181,24 +181,24 @@ def texts_agg_f1_mean(expected: str,
 
 def texts_agg_precision_min(expected: str,
                             given: str,
-                            target: float,
+                            lower_bound: float,
                             full_runs: int = 5,
                             each_question_runs: int = 1) -> None:
     check_input_runs(full_runs, each_question_runs)
     score = texts_agg_precision(expected, given, full_runs, each_question_runs,
                                 AggType.MINIMUM)
-    test_score(score, 1.0, target, expected, given, ScoreType.PRECISION)
+    test_score(score, 1.0, lower_bound, expected, given, ScoreType.PRECISION)
 
 
 def texts_agg_precision_max(expected: str,
                             given: str,
-                            target: float,
+                            upper_bound: float,
                             full_runs: int = 5,
                             each_question_runs: int = 1) -> None:
     check_input_runs(full_runs, each_question_runs)
     score = texts_agg_precision(expected, given, full_runs, each_question_runs,
                                 AggType.MAXIMUM)
-    test_score(score, target, 0.0, expected, given, ScoreType.PRECISION)
+    test_score(score, upper_bound, 0.0, expected, given, ScoreType.PRECISION)
 
 
 def texts_agg_precision_median(expected: str,
@@ -240,24 +240,24 @@ def texts_agg_precision_mean(expected: str,
 
 def texts_agg_recall_min(expected: str,
                          given: str,
-                         target: float,
+                         lower_bound: float,
                          full_runs: int = 5,
                          each_question_runs: int = 1) -> None:
     check_input_runs(full_runs, each_question_runs)
     score = texts_agg_recall(expected, given, full_runs, each_question_runs,
                              AggType.MINIMUM)
-    test_score(score, 1.0, target, expected, given, ScoreType.RECALL)
+    test_score(score, 1.0, lower_bound, expected, given, ScoreType.RECALL)
 
 
 def texts_agg_recall_max(expected: str,
                          given: str,
-                         target: float,
+                         upper_bound: float,
                          full_runs: int = 5,
                          each_question_runs: int = 1) -> None:
     check_input_runs(full_runs, each_question_runs)
     score = texts_agg_recall(expected, given, full_runs, each_question_runs,
                              AggType.MAXIMUM)
-    test_score(score, target, 0.0, expected, given, ScoreType.RECALL)
+    test_score(score, upper_bound, 0.0, expected, given, ScoreType.RECALL)
 
 
 def texts_agg_recall_median(expected: str,
