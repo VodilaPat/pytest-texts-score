@@ -38,7 +38,7 @@ def test_texts_agg_f1_mean_mock(mock_texts_multiple_f1):
     mock_texts_multiple_f1.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_f1_mean("any", "any", 0.5, 0, 4, 1)
+    texts_agg_f1_mean("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_f1 was called exactly once
     mock_texts_multiple_f1.assert_called_once()
@@ -53,7 +53,7 @@ def test_texts_agg_f1_average_mock(mock_texts_multiple_f1):
     mock_texts_multiple_f1.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_f1_average("any", "any", 0.5, 0, 4, 1)
+    texts_agg_f1_average("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_f1 was called exactly once
     mock_texts_multiple_f1.assert_called_once()
@@ -68,7 +68,7 @@ def test_texts_agg_f1_max_mock(mock_texts_multiple_f1):
     mock_texts_multiple_f1.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_f1_max("any", "any", 1, 4, 1)
+    texts_agg_f1_max("any", "any", 1, 4, 1, True)
 
     # Verify that texts_multiple_f1 was called exactly once
     mock_texts_multiple_f1.assert_called_once()
@@ -83,7 +83,7 @@ def test_texts_agg_f1_median_mock(mock_texts_multiple_f1):
     mock_texts_multiple_f1.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_f1_median("any", "any", 0.5, 0, 4, 1)
+    texts_agg_f1_median("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_f1 was called exactly once
     mock_texts_multiple_f1.assert_called_once()
@@ -98,7 +98,7 @@ def test_texts_agg_f1_min_mock(mock_texts_multiple_f1):
     mock_texts_multiple_f1.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_f1_min("any", "any", 0, 4, 1)
+    texts_agg_f1_min("any", "any", 0, 4, 1, True)
 
     # Verify that texts_multiple_f1 was called exactly once
     mock_texts_multiple_f1.assert_called_once()
@@ -113,7 +113,7 @@ def test_texts_agg_precision_mean_mock(mock_texts_multiple_precision):
     mock_texts_multiple_precision.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_precision_mean("any", "any", 0.5, 0, 4, 1)
+    texts_agg_precision_mean("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_precision was called exactly once
     mock_texts_multiple_precision.assert_called_once()
@@ -128,7 +128,7 @@ def test_texts_agg_precision_average_mock(mock_texts_multiple_precision):
     mock_texts_multiple_precision.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_precision_average("any", "any", 0.5, 0, 4, 1)
+    texts_agg_precision_average("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_precision was called exactly once
     mock_texts_multiple_precision.assert_called_once()
@@ -143,7 +143,7 @@ def test_texts_agg_precision_max_mock(mock_texts_multiple_precision):
     mock_texts_multiple_precision.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_precision_max("any", "any", 1, 4, 1)
+    texts_agg_precision_max("any", "any", 1, 4, 1, True)
 
     # Verify that texts_multiple_precision was called exactly once
     mock_texts_multiple_precision.assert_called_once()
@@ -158,7 +158,7 @@ def test_texts_agg_precision_median_mock(mock_texts_multiple_precision):
     mock_texts_multiple_precision.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_precision_median("any", "any", 0.5, 0, 4, 1)
+    texts_agg_precision_median("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_precision was called exactly once
     mock_texts_multiple_precision.assert_called_once()
@@ -173,7 +173,7 @@ def test_texts_agg_precision_min_mock(mock_texts_multiple_precision):
     mock_texts_multiple_precision.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_precision_min("any", "any", 0, 4, 1)
+    texts_agg_precision_min("any", "any", 0, 4, 1, True)
 
     # Verify that texts_multiple_precision was called exactly once
     mock_texts_multiple_precision.assert_called_once()
@@ -188,7 +188,7 @@ def test_texts_agg_recall_mean_mock(mock_texts_multiple_recall):
     mock_texts_multiple_recall.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_recall_mean("any", "any", 0.5, 0, 4, 1)
+    texts_agg_recall_mean("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_recall was called exactly once
     mock_texts_multiple_recall.assert_called_once()
@@ -203,7 +203,7 @@ def test_texts_agg_recall_average_mock(mock_texts_multiple_recall):
     mock_texts_multiple_recall.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_recall_average("any", "any", 0.5, 0, 4, 1)
+    texts_agg_recall_average("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_recall was called exactly once
     mock_texts_multiple_recall.assert_called_once()
@@ -218,7 +218,7 @@ def test_texts_agg_recall_max_mock(mock_texts_multiple_recall):
     mock_texts_multiple_recall.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_recall_max("any", "any", 1, 4, 1)
+    texts_agg_recall_max("any", "any", 1, 4, 1, True)
 
     # Verify that texts_multiple_recall was called exactly once
     mock_texts_multiple_recall.assert_called_once()
@@ -233,7 +233,7 @@ def test_texts_agg_recall_median_mock(mock_texts_multiple_recall):
     mock_texts_multiple_recall.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_recall_median("any", "any", 0.5, 0, 4, 1)
+    texts_agg_recall_median("any", "any", 0.5, 0, 4, 1, True)
 
     # Verify that texts_multiple_recall was called exactly once
     mock_texts_multiple_recall.assert_called_once()
@@ -248,7 +248,7 @@ def test_texts_agg_recall_min_mock(mock_texts_multiple_recall):
     mock_texts_multiple_recall.return_value = [1, 1, 0, 0]
 
     # Call the function with test parameters
-    texts_agg_recall_min("any", "any", 0, 4, 1)
+    texts_agg_recall_min("any", "any", 0, 4, 1, True)
 
     # Verify that texts_multiple_recall was called exactly once
     mock_texts_multiple_recall.assert_called_once()
@@ -259,11 +259,11 @@ def test_texts_agg_recall_min_mock(mock_texts_multiple_recall):
 @patch('pytest_texts_score.api_wrappers.texts_agg_precision_mean')
 def test_texts_agg_completeness_mean_mock(mock_texts_agg_precision_mean):
     # Call the wrapper function with test parameters
-    texts_agg_completeness_mean("expected", "given", 0.5, 0.1, 5, 1)
+    texts_agg_completeness_mean("expected", "given", 0.5, 0.1, 5, 1, True)
 
     # Verify that texts_agg_precision_mean was called with the same parameters
     mock_texts_agg_precision_mean.assert_called_once_with(
-        "expected", "given", 0.5, 0.1, 5, 1)
+        "expected", "given", 0.5, 0.1, 5, 1, True)
 
 
 # Test for texts_agg_completeness_average
@@ -271,11 +271,11 @@ def test_texts_agg_completeness_mean_mock(mock_texts_agg_precision_mean):
 @patch('pytest_texts_score.api_wrappers.texts_agg_precision_average')
 def test_texts_agg_completeness_average_mock(mock_texts_agg_precision_average):
     # Call the wrapper function with test parameters
-    texts_agg_completeness_average("expected", "given", 0.5, 0.1, 5, 1)
+    texts_agg_completeness_average("expected", "given", 0.5, 0.1, 5, 1, True)
 
     # Verify that texts_agg_precision_average was called with the same parameters
     mock_texts_agg_precision_average.assert_called_once_with(
-        "expected", "given", 0.5, 0.1, 5, 1)
+        "expected", "given", 0.5, 0.1, 5, 1, True)
 
 
 # Test for texts_agg_completeness_max
@@ -283,11 +283,11 @@ def test_texts_agg_completeness_average_mock(mock_texts_agg_precision_average):
 @patch('pytest_texts_score.api_wrappers.texts_agg_precision_max')
 def test_texts_agg_completeness_max_mock(mock_texts_agg_precision_max):
     # Call the wrapper function with test parameters
-    texts_agg_completeness_max("expected", "given", 1.0, 5, 1)
+    texts_agg_completeness_max("expected", "given", 1.0, 5, 1, True)
 
     # Verify that texts_agg_precision_max was called with the same parameters
     mock_texts_agg_precision_max.assert_called_once_with(
-        "expected", "given", 1.0, 5, 1)
+        "expected", "given", 1.0, 5, 1, True)
 
 
 # Test for texts_agg_completeness_median
@@ -295,11 +295,11 @@ def test_texts_agg_completeness_max_mock(mock_texts_agg_precision_max):
 @patch('pytest_texts_score.api_wrappers.texts_agg_precision_median')
 def test_texts_agg_completeness_median_mock(mock_texts_agg_precision_median):
     # Call the wrapper function with test parameters
-    texts_agg_completeness_median("expected", "given", 0.5, 0.1, 5, 1)
+    texts_agg_completeness_median("expected", "given", 0.5, 0.1, 5, 1, True)
 
     # Verify that texts_agg_precision_median was called with the same parameters
     mock_texts_agg_precision_median.assert_called_once_with(
-        "expected", "given", 0.5, 0.1, 5, 1)
+        "expected", "given", 0.5, 0.1, 5, 1, True)
 
 
 # Test for texts_agg_completeness_min
@@ -307,11 +307,11 @@ def test_texts_agg_completeness_median_mock(mock_texts_agg_precision_median):
 @patch('pytest_texts_score.api_wrappers.texts_agg_precision_min')
 def test_texts_agg_completeness_min_mock(mock_texts_agg_precision_min):
     # Call the wrapper function with test parameters
-    texts_agg_completeness_min("expected", "given", 0.0, 5, 1)
+    texts_agg_completeness_min("expected", "given", 0.0, 5, 1, True)
 
     # Verify that texts_agg_precision_min was called with the same parameters
     mock_texts_agg_precision_min.assert_called_once_with(
-        "expected", "given", 0.0, 5, 1)
+        "expected", "given", 0.0, 5, 1, True)
 
 
 # Test for texts_agg_correctness_mean
@@ -319,11 +319,11 @@ def test_texts_agg_completeness_min_mock(mock_texts_agg_precision_min):
 @patch('pytest_texts_score.api_wrappers.texts_agg_recall_mean')
 def test_texts_agg_correctness_mean_mock(mock_texts_agg_recall_mean):
     # Call the wrapper function with test parameters
-    texts_agg_correctness_mean("expected", "given", 0.5, 0.1, 5, 1)
+    texts_agg_correctness_mean("expected", "given", 0.5, 0.1, 5, 1, True)
 
     # Verify that texts_agg_recall_mean was called with the same parameters
     mock_texts_agg_recall_mean.assert_called_once_with("expected", "given", 0.5,
-                                                       0.1, 5, 1)
+                                                       0.1, 5, 1, True)
 
 
 # Test for texts_agg_correctness_average
@@ -331,11 +331,11 @@ def test_texts_agg_correctness_mean_mock(mock_texts_agg_recall_mean):
 @patch('pytest_texts_score.api_wrappers.texts_agg_recall_average')
 def test_texts_agg_correctness_average_mock(mock_texts_agg_recall_average):
     # Call the wrapper function with test parameters
-    texts_agg_correctness_average("expected", "given", 0.5, 0.1, 5, 1)
+    texts_agg_correctness_average("expected", "given", 0.5, 0.1, 5, 1, True)
 
     # Verify that texts_agg_recall_average was called with the same parameters
     mock_texts_agg_recall_average.assert_called_once_with(
-        "expected", "given", 0.5, 0.1, 5, 1)
+        "expected", "given", 0.5, 0.1, 5, 1, True)
 
 
 # Test for texts_agg_correctness_max
@@ -343,11 +343,11 @@ def test_texts_agg_correctness_average_mock(mock_texts_agg_recall_average):
 @patch('pytest_texts_score.api_wrappers.texts_agg_recall_max')
 def test_texts_agg_correctness_max_mock(mock_texts_agg_recall_max):
     # Call the wrapper function with test parameters
-    texts_agg_correctness_max("expected", "given", 1.0, 5, 1)
+    texts_agg_correctness_max("expected", "given", 1.0, 5, 1, True)
 
     # Verify that texts_agg_recall_max was called with the same parameters
     mock_texts_agg_recall_max.assert_called_once_with("expected", "given", 1.0,
-                                                      5, 1)
+                                                      5, 1, True)
 
 
 # Test for texts_agg_correctness_median
@@ -355,11 +355,11 @@ def test_texts_agg_correctness_max_mock(mock_texts_agg_recall_max):
 @patch('pytest_texts_score.api_wrappers.texts_agg_recall_median')
 def test_texts_agg_correctness_median_mock(mock_texts_agg_recall_median):
     # Call the wrapper function with test parameters
-    texts_agg_correctness_median("expected", "given", 0.5, 0.1, 5, 1)
+    texts_agg_correctness_median("expected", "given", 0.5, 0.1, 5, 1, True)
 
     # Verify that texts_agg_recall_median was called with the same parameters
     mock_texts_agg_recall_median.assert_called_once_with(
-        "expected", "given", 0.5, 0.1, 5, 1)
+        "expected", "given", 0.5, 0.1, 5, 1, True)
 
 
 # Test for texts_agg_correctness_min
@@ -367,8 +367,8 @@ def test_texts_agg_correctness_median_mock(mock_texts_agg_recall_median):
 @patch('pytest_texts_score.api_wrappers.texts_agg_recall_min')
 def test_texts_agg_correctness_min_mock(mock_texts_agg_recall_min):
     # Call the wrapper function with test parameters
-    texts_agg_correctness_min("expected", "given", 0.0, 5, 1)
+    texts_agg_correctness_min("expected", "given", 0.0, 5, 1, True)
 
     # Verify that texts_agg_recall_min was called with the same parameters
     mock_texts_agg_recall_min.assert_called_once_with("expected", "given", 0.0,
-                                                      5, 1)
+                                                      5, 1, True)
