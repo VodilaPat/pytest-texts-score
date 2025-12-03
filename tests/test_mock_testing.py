@@ -1,4 +1,6 @@
-from unittest.mock import patch
+from unittest.mock import call, patch
+
+import pytest
 
 from pytest_texts_score import (
     texts_agg_f1_average,
@@ -26,6 +28,13 @@ from pytest_texts_score import (
     texts_agg_correctness_max,
     texts_agg_correctness_median,
     texts_agg_correctness_min,
+)
+from pytest_texts_score.evaluate_score import (
+    MAXMIMAL_RETRY_ON_ERROR,
+    score_one_side,
+    texts_multiple_f1,
+    texts_multiple_precision,
+    texts_multiple_recall,
 )
 
 
@@ -372,3 +381,184 @@ def test_texts_agg_correctness_min_mock(mock_texts_agg_recall_min):
     # Verify that texts_agg_recall_min was called with the same parameters
     mock_texts_agg_recall_min.assert_called_once_with("expected", "given", 0.0,
                                                       5, 1, True)
+
+
+# Test for retry mechanism in score_one_side
+# Expected behavior: Retries on failure and succeeds
+@patch('pytest_texts_score.evaluate_score.evaluate_questions')
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_score_one_side_retry_succeeds(mock_make_questions,
+                                       mock_evaluate_questions):
+    # Configure make_questions to fail twice then succeed
+    mock_make_questions.side_effect = [
+        Exception("Failed to generate questions"),
+        Exception("Failed to generate questions again"), "successful questions"
+    ]
+    # Configure evaluate_questions to return a successful response
+    mock_evaluate_questions.return_value = [{"answer": 1.0}, {"answer": 0.5}]
+
+    # Call the function that should retry
+    result = score_one_side("base", "answer", retry_on_error=True)
+
+    # Verify the result is correct
+    assert result == 0.75
+    # Verify make_questions was called 3 times
+    assert mock_make_questions.call_count == 3
+    # Verify evaluate_questions was called once with the successful questions
+    mock_evaluate_questions.assert_called_once_with("answer",
+                                                    "successful questions")
+
+
+# Test for retry mechanism in score_one_side when it always fails
+# Expected behavior: Retries until max retries and then raises an exception
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_score_one_side_retry_fails(mock_make_questions):
+    # Configure make_questions to always fail
+    mock_make_questions.side_effect = Exception("Always fails")
+
+    # Verify that the function raises an exception after exhausting retries
+    with pytest.raises(
+            Exception,
+            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+    ):
+        score_one_side("base", "answer", retry_on_error=True)
+
+    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+
+
+# --- Tests for retry mechanism in texts_multiple_* functions ---
+
+
+# Test for retry mechanism in texts_multiple_f1
+# Expected behavior: Retries on failure and succeeds
+@patch('pytest_texts_score.evaluate_score.evaluate_questions')
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_texts_multiple_f1_retry_succeeds(mock_make_questions,
+                                          mock_evaluate_questions):
+    mock_make_questions.side_effect = [
+        Exception("Failed to generate questions"),  # First call fails
+        # Subsequent calls succeed
+        "successful questions precision",
+        "successful questions recall"
+    ]
+    mock_evaluate_questions.side_effect = [
+        # Mock responses for precision and recall
+        [{
+            "answer": 1.0
+        }],  # precision
+        [{
+            "answer": 0.5
+        }],  # recall
+    ]
+
+    # Call the function that should retry
+    result = texts_multiple_f1("expected", "given", 1, 1, score_only=True)
+
+    # Verify the result is correct
+    assert result == [0.6666666666666666]
+    # Verify make_questions was called 3 times (1 failure, 2 successes)
+    assert mock_make_questions.call_count == 3
+    # Verify evaluate_questions was called twice (for precision and recall)
+    assert mock_evaluate_questions.call_count == 2
+
+
+# Test for retry mechanism in texts_multiple_f1 when it always fails
+# Expected behavior: Retries until max retries and then raises an exception
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_texts_multiple_f1_retry_fails(mock_make_questions):
+    # Configure make_questions to always fail
+    mock_make_questions.side_effect = Exception("Always fails")
+
+    with pytest.raises(
+            Exception,
+            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+    ):
+        texts_multiple_f1("expected", "given", 1, 1)
+
+    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+
+
+# Test for retry mechanism in texts_multiple_precision
+# Expected behavior: Retries on failure and succeeds
+@patch('pytest_texts_score.evaluate_score.evaluate_questions')
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_texts_multiple_precision_retry_succeeds(mock_make_questions,
+                                                 mock_evaluate_questions):
+    mock_make_questions.side_effect = [
+        Exception("Failed to generate questions"), "successful questions"
+    ]
+    # Configure evaluate_questions to return a successful response
+    mock_evaluate_questions.return_value = [{"answer": 0.75}]
+
+    # Call the function that should retry
+    result = texts_multiple_precision("expected",
+                                      "given",
+                                      1,
+                                      1,
+                                      score_only=True)
+
+    # Verify the result is correct
+    assert result == [0.75]
+    # Verify make_questions was called 2 times (1 failure, 1 success)
+    assert mock_make_questions.call_count == 2
+    # Verify evaluate_questions was called once with the successful questions
+    mock_evaluate_questions.assert_called_once_with("expected",
+                                                    "successful questions")
+
+
+# Test for retry mechanism in texts_multiple_precision when it always fails
+# Expected behavior: Retries until max retries and then raises an exception
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_texts_multiple_precision_retry_fails(mock_make_questions):
+    # Configure make_questions to always fail
+    mock_make_questions.side_effect = Exception("Always fails")
+
+    with pytest.raises(
+            Exception,
+            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+    ):
+        texts_multiple_precision("expected", "given", 1, 1)
+
+    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+
+
+# Test for retry mechanism in texts_multiple_recall
+# Expected behavior: Retries on failure and succeeds
+@patch('pytest_texts_score.evaluate_score.evaluate_questions')
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_texts_multiple_recall_retry_succeeds(mock_make_questions,
+                                              mock_evaluate_questions):
+    mock_make_questions.side_effect = [
+        Exception("Failed to generate questions"), "successful questions"
+    ]
+    mock_evaluate_questions.return_value = [{"answer": 0.25}]
+
+    result = texts_multiple_recall("expected", "given", 1, 1, score_only=True)
+
+    # Verify the result is correct
+    assert result == [0.25]
+    # Verify make_questions was called 2 times (1 failure, 1 success)
+    assert mock_make_questions.call_count == 2
+    # Verify evaluate_questions was called once with the successful questions
+    mock_evaluate_questions.assert_called_once_with("given",
+                                                    "successful questions")
+
+
+# Test for retry mechanism in texts_multiple_recall when it always fails
+# Expected behavior: Retries until max retries and then raises an exception
+@patch('pytest_texts_score.evaluate_score.make_questions')
+def test_texts_multiple_recall_retry_fails(mock_make_questions):
+    # Configure make_questions to always fail
+    mock_make_questions.side_effect = Exception("Always fails")
+
+    with pytest.raises(
+            Exception,
+            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+    ):
+        texts_multiple_recall("expected", "given", 1, 1)
+
+    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
