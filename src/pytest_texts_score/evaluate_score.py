@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Literal
 from pytest_texts_score.communication import (
     score_one_side,
-    evalute_questions,
+    evaluate_questions,
     make_questions,
 )
 from statistics import median, mean
@@ -52,14 +52,15 @@ def texts_multiple_f1(
         question_text_precision = make_questions(given)
         question_text_recall = make_questions(expected)
         for a_i in range(generate_answers_per_questions):
-            answers_list_precision = evalute_questions(expected,
-                                                       question_text_precision)
+            answers_list_precision = evaluate_questions(
+                expected, question_text_precision)
             score_value_counts = [
                 j.get("answer") for j in answers_list_precision
             ]
             precision = sum(score_value_counts) / len(score_value_counts)
 
-            answers_list_recall = evalute_questions(given, question_text_recall)
+            answers_list_recall = evaluate_questions(given,
+                                                     question_text_recall)
             score_value_counts = [j.get("answer") for j in answers_list_recall]
             recall = sum(score_value_counts) / len(score_value_counts)
             if score_only:
@@ -81,8 +82,8 @@ def texts_multiple_precision(
     for q_i in range(generate_questions):
         question_text_precision = make_questions(given)
         for a_i in range(generate_answers_per_questions):
-            answers_list_precision = evalute_questions(expected,
-                                                       question_text_precision)
+            answers_list_precision = evaluate_questions(
+                expected, question_text_precision)
             score_value_counts = [
                 j.get("answer") for j in answers_list_precision
             ]
@@ -106,7 +107,8 @@ def texts_multiple_recall(
     for q_i in range(generate_questions):
         question_text_recall = make_questions(expected)
         for a_i in range(generate_answers_per_questions):
-            answers_list_recall = evalute_questions(given, question_text_recall)
+            answers_list_recall = evaluate_questions(given,
+                                                     question_text_recall)
             score_value_counts = [j.get("answer") for j in answers_list_recall]
             recall = sum(score_value_counts) / len(score_value_counts)
             if score_only:

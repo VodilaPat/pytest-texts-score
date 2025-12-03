@@ -43,7 +43,7 @@ def make_questions(base_text):
     return questions_text
 
 
-def evalute_questions(answer_text, questions_text):
+def evaluate_questions(answer_text, questions_text):
     config = get_config()
     client = get_client()
     response = client.chat.completions.create(
@@ -72,13 +72,13 @@ def evalute_questions(answer_text, questions_text):
         parsed = json.loads(response.strip())
         answers_list = parsed.get("list")
     except Exception as e:
-        pytest.raises(Exception("evalute_questions parse error"))
+        pytest.raises(Exception("evaluate_questions parse error"))
     return answers_list
 
 
 def score_one_side(base_text, answer_text):
     qustions_text = make_questions(base_text)
-    answers_list = evalute_questions(answer_text, qustions_text)
+    answers_list = evaluate_questions(answer_text, qustions_text)
     # questions_from_answers = [j.get('question') for j in answers_list]
     score_value_counts = [j.get("answer") for j in answers_list]
     return sum(score_value_counts) / len(score_value_counts)
