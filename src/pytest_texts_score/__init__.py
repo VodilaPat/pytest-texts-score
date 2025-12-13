@@ -1,4 +1,14 @@
-"""Public API for pytest_texts_score."""
+"""
+Main entry point for the ``pytest-texts-score`` public API.
+
+This module exposes the primary functions for text-based scoring and assertions
+within pytest. It includes functions for single-run evaluations
+(``texts_expect_*``) and multi-run, aggregated evaluations (``texts_agg_*``) for
+metrics like F1, precision, and recall.
+
+It also provides aliases like "completeness" for precision and "correctness"
+for recall, which can be more intuitive in certain testing contexts.
+"""
 
 from pytest_texts_score.api import (
     texts_agg_f1_max,

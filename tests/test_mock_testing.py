@@ -30,7 +30,7 @@ from pytest_texts_score import (
     texts_agg_correctness_min,
 )
 from pytest_texts_score.evaluate_score import (
-    MAXMIMAL_RETRY_ON_ERROR,
+    MAXIMAL_RETRY_ON_ERROR,
     score_one_side,
     texts_multiple_f1,
     texts_multiple_precision,
@@ -419,12 +419,12 @@ def test_score_one_side_retry_fails(mock_make_questions):
     # Verify that the function raises an exception after exhausting retries
     with pytest.raises(
             Exception,
-            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+            match=f"Operation failed after {MAXIMAL_RETRY_ON_ERROR + 1} retries"
     ):
         score_one_side("base", "answer", retry_on_error=True)
 
-    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
-    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+    # Verify make_questions was called MAXIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXIMAL_RETRY_ON_ERROR + 1
 
 
 # --- Tests for retry mechanism in texts_multiple_* functions ---
@@ -472,12 +472,12 @@ def test_texts_multiple_f1_retry_fails(mock_make_questions):
 
     with pytest.raises(
             Exception,
-            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+            match=f"Operation failed after {MAXIMAL_RETRY_ON_ERROR + 1} retries"
     ):
         texts_multiple_f1("expected", "given", 1, 1)
 
-    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
-    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+    # Verify make_questions was called MAXIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXIMAL_RETRY_ON_ERROR + 1
 
 
 # Test for retry mechanism in texts_multiple_precision
@@ -517,12 +517,12 @@ def test_texts_multiple_precision_retry_fails(mock_make_questions):
 
     with pytest.raises(
             Exception,
-            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+            match=f"Operation failed after {MAXIMAL_RETRY_ON_ERROR + 1} retries"
     ):
         texts_multiple_precision("expected", "given", 1, 1)
 
-    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
-    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+    # Verify make_questions was called MAXIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXIMAL_RETRY_ON_ERROR + 1
 
 
 # Test for retry mechanism in texts_multiple_recall
@@ -556,9 +556,9 @@ def test_texts_multiple_recall_retry_fails(mock_make_questions):
 
     with pytest.raises(
             Exception,
-            match=f"Operation failed after {MAXMIMAL_RETRY_ON_ERROR + 1} retries"
+            match=f"Operation failed after {MAXIMAL_RETRY_ON_ERROR + 1} retries"
     ):
         texts_multiple_recall("expected", "given", 1, 1)
 
-    # Verify make_questions was called MAXMIMAL_RETRY_ON_ERROR + 1 times
-    assert mock_make_questions.call_count == MAXMIMAL_RETRY_ON_ERROR + 1
+    # Verify make_questions was called MAXIMAL_RETRY_ON_ERROR + 1 times
+    assert mock_make_questions.call_count == MAXIMAL_RETRY_ON_ERROR + 1

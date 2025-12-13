@@ -1,7 +1,23 @@
+from openai import AzureOpenAI
 import pytest
+from typing import Callable, Optional
+
+# A global variable to hold the pytest config object.
+_global_config: Optional[pytest.Config] = None
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """
+    Add command-line and .ini options for LLM configuration to pytest.
+
+    This hook implementation defines various options to configure the Azure
+    OpenAI client, such as API key, endpoint, model, and other parameters.
+    Options can be provided via the command line or a ``pytest.ini`` file.
+
+    :param parser: The pytest option parser.
+    :type parser: pytest.Parser
+    :return: None.
+    """
     group = parser.getgroup("llm", "Options for Langchain/Azure LLM client")
     # Add CLI options
     group.addoption(
@@ -68,8 +84,21 @@ def pytest_addoption(parser):
                   default="8192")
 
 
-def pytest_configure(config):
-    """Resolve LLM config (CLI > ini > default) and initialize the client."""
+def pytest_configure(config: pytest.Config) -> None:
+    """
+    Resolve LLM config (CLI > ini > default) and initialize the client.
+
+    This hook is called after command line and configuration files are parsed.
+    It resolves the final configuration values by prioritizing command-line
+    options over ``.ini`` file settings, and then over default values. It
+    validates that all required settings are present and then initializes the
+    global LLM client.
+
+    :param config: The pytest config object.
+    :type config: pytest.Config
+    :return: None.
+    :raises pytest.UsageError: If any required configuration values are missing.
+    """
     from .client import init_client
 
     # Resolve final values
@@ -100,7 +129,7 @@ def pytest_configure(config):
             "api_version": config._llm_api_version,
             "deployment": config._llm_deployment,
             # "temperature": config._llm_temperature,
-            "max_tries": config._llm_max_tokens,
+            "max_tokens": config._llm_max_tokens,
             "model": config._llm_model,
         }.items() if not value
     ]
@@ -122,15 +151,36 @@ def pytest_configure(config):
     _global_config = config
 
 
-def get_config():
-    """Return the initialized AzureOpenAI client."""
+def get_config() -> pytest.Config:
+    """
+    Return the initialized pytest configuration object.
+
+    Retrieves the globally stored ``pytest.Config`` object, which contains
+    the resolved LLM configuration. This function should be called after
+    ``pytest_configure`` has run.
+
+    :return: The pytest config object.
+    :rtype: pytest.Config
+    :raises RuntimeError: If the configuration has not been initialized.
+    """
     if _global_config is None:
         raise RuntimeError("Config not initialized.")
     return _global_config
 
 
-def pytest_report_header(config):
-    # Show the resolved configuration at the start of test run
+def pytest_report_header(config: pytest.Config) -> str:
+    """
+    Add LLM configuration details to the pytest report header.
+
+    This hook provides a custom string to be displayed in the header of the
+    test report, showing the resolved LLM configuration parameters for the
+    current test run. The API key is masked for security.
+
+    :param config: The pytest config object.
+    :type config: pytest.Config
+    :return: A string to be included in the report header.
+    :rtype: str
+    """
     return ("LLM config: "
             f"endpoint={config._llm_endpoint!r}, "
             f"deployment={config._llm_deployment!r}, "
@@ -142,16 +192,37 @@ def pytest_report_header(config):
 
 
 @pytest.fixture(scope="session")
-def texts_score_client():
-    """Provide access to the initialized LLM client."""
+def texts_score_client() -> AzureOpenAI:
+    """
+    Provide access to the initialized LLM client as a fixture.
+
+    This session-scoped fixture allows tests to get the configured
+    ``AzureOpenAI`` client instance.
+
+    :return: The initialized ``AzureOpenAI`` client.
+    :rtype: AzureOpenAI
+    """
     from .client import get_client
 
     return get_client()
 
 
 @pytest.fixture
-def texts_score():
-    """Fixture providing access to text comparison helpers."""
+def texts_score() -> dict[str, Callable]:
+    """
+    Provide access to text comparison helper functions as a fixture.
+
+    This fixture returns a dictionary of callable functions for text scoring
+    and evaluation. These functions include various aggregation and expectation
+    helpers for metrics like F1 score, precision, recall, completeness, and correctness.
+
+    :return: A dictionary mapping function names to callable helper functions.
+    :rtype: dict[str, Callable]
+
+    .. note::
+        This fixture returns a dictionary of functions rather than exposing them
+        globally.
+    """
     from .api import (
         texts_agg_f1_max,
         texts_agg_f1_mean,
@@ -231,7 +302,18 @@ def texts_score():
     }
 
 
-def mask_api_key(key: str | None) -> str | None:
+def mask_api_key(key: Optional[str]) -> Optional[str]:
+    """
+    Mask an API key for safe display.
+
+    Replaces all but the first character of the API key with asterisks (``*``)
+    to prevent leaking sensitive information in logs or reports.
+
+    :param key: The API key to mask.
+    :type key: Optional[str]
+    :return: The masked API key, or ``None`` if the input was ``None``.
+    :rtype: Optional[str]
+    """
     if not key:
         return None
     return key[0] + "*" * (len(key) - 1)

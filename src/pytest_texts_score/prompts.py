@@ -1,4 +1,7 @@
-"""Prompt templates used by pytest-texts-score."""
+"""
+Prompt templates used by pytest-texts-score.
+These prompts are carefully engineered to guide the LLM's behavior for question generation and evaluation. Modifying them may have significant impacts on the scoring results.
+"""
 
 QUESTION_PROMPT = """You are a meticulous text analysis assistant. Your task is to generate **yes/no questions** that reflect the information explicitly or implicitly contained in a given text.
 
@@ -57,7 +60,7 @@ Output:
 ...
  "50": "Does the text describe the Amazon rainforest to play a critical role?",
 ...
- "250": "Does the text suggest that the Amazon's ecosystem is significant for the Earth's climate.?"
+ "250": "Does the text suggest that the Amazon's ecosystem is significant for the Earth's climate?"
 }
 
 #### Example 3:
@@ -164,10 +167,10 @@ Questions to answer:
 Output:
 {
   "list": [
-    {"question": "Does the text state that the Graphics Processing Unit is electronic circuit designed for calculation?, "answer": 0.75},
-    {"question": "Does the text state that the Graphics Processing Unit is circuit used for playing games?, "answer": 0.25},
-    {"question": "Does the text state that the Graphics Processing Unit is designed to perform computations?, "answer": 1},
-    {"question": "Does the text state that the Graphics Processing Unit is used for playing games?, "answer": 0},
+    {"question": "Does the text state that the Graphics Processing Unit is electronic circuit designed for calculation?", "answer": 0.75},
+    {"question": "Does the text state that the Graphics Processing Unit is circuit used for playing games?", "answer": 0.25},
+    {"question": "Does the text state that the Graphics Processing Unit is designed to perform computations?", "answer": 1},
+    {"question": "Does the text state that the Graphics Processing Unit is used for playing games?", "answer": 0}
   ]
 }
 ---
@@ -178,18 +181,60 @@ Only return the final output as a valid JSON object (no explanation or extra tex
 
 
 def get_system_questions_prompt() -> str:
+    """
+    Get the system prompt for generating questions.
+
+    This function returns the predefined system prompt that instructs the LLM
+    on how to generate factual yes/no questions from a given text.
+
+    :return: The question generation prompt string.
+    :rtype: str
+    """
     return QUESTION_PROMPT
 
 
 def get_system_answers_prompt() -> str:
+    """
+    Get the system prompt for answering questions.
+
+    This function returns the predefined system prompt that instructs the LLM
+    on how to answer a list of questions based on a given text, using a numeric scoring system.
+
+    :return: The question answering prompt string.
+    :rtype: str
+    """
     return ANSWER_PROMPT
 
 
-def get_user_questions_prompt(text) -> str:
+def get_user_questions_prompt(text: str) -> str:
+    """
+    Create a user prompt for question generation.
+
+    This function formats the user-provided text into a simple prompt
+    that will be paired with the system question prompt.
+
+    :param text: The text to generate questions from.
+    :type text: str
+    :return: The formatted user prompt string.
+    :rtype: str
+    """
     return f"""Text : "{text}\""""
 
 
 def get_user_answers_prompt(answer_text: str, questions_text: str) -> str:
+    """
+    Create a user prompt for answering questions.
+
+    This function formats the text and the questions into a single prompt
+    that will be paired with the system answer prompt.
+
+    :param answer_text: The text to use for answering the questions.
+    :type answer_text: str
+    :param questions_text: The JSON string of questions to be answered.
+    :type questions_text: str
+    :return: The formatted user prompt string.
+    :rtype: str
+    """
     return f"""Text:
 
 {answer_text}
