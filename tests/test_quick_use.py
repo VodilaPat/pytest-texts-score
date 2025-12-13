@@ -10,7 +10,7 @@ def test_texts_compare_fixture(pytester):
     # Create a temporary pytest test module that uses the texts_score fixture
     pytester.makepyfile("""
         def test_sth(texts_score):
-            texts_score["expect_f1_equal"]("foo","foo",target=1.0)
+            texts_score["expect_f1_equal"]("foo","foo",1.0)
     """)
 
     # Run pytest with the configuration from the running session
