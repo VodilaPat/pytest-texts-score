@@ -130,6 +130,15 @@ The ``texts_score`` fixture exposes all assertion helpers in a dictionary.
 
 ----
 
+
+Documentation
+-------------
+Documentation is availbe at `documentation`_
+
+
+----
+
+
 Available Assertions
 --------------------
 
@@ -242,6 +251,7 @@ Please report bugs or feature requests via the GitHub issue tracker:
 ----
 
 .. _`MIT`: https://opensource.org/licenses/MIT
+.. _`documentation`: https://vodilapat.github.io/pytest-texts-score/html/index.html
 .. _`file an issue`: https://github.com/VodilaPat/pytest-texts-score/issues
 .. _`pip`: https://pypi.org/project/pip/
 .. _`PyPI`: https://pypi.org/project
