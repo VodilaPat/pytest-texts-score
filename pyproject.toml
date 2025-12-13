@@ -47,3 +47,8 @@ based_on_style = "google"
 
 # This ensures it matches Pylint's setting.
 column_limit = 80
+
+[dependency-groups]
+dev = [
+    "sphinx>=8.1.3",
+]
