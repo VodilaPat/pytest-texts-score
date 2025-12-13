@@ -1,8 +1,8 @@
 [pytest]
-llm_api_key=dddddddddddddddddddddddddddddddd
-llm_endpoint=https:.../
-llm_api_version=2024-08-01-preview
-llm_deployment=gpt-4-deployment
-llm_temperature=0
-llm_max_tokens=8192
-llm_model=gpt-4
+llm_api_key = YOUR_API_KEY
+llm_endpoint = https://your-resource.openai.azure.com/
+llm_api_version = 2024-05-01
+llm_deployment = your-deployment-name
+llm_model = gpt-4
+llm_temperature = 0
+llm_max_tokens = 8192
