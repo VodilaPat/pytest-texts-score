@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pytest_texts_score.communication &#8212; pytest-texts-score  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pytest_texts_score.communication</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pytest_texts_score.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_client</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytest_texts_score.plugin</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytest_texts_score.prompts</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_system_answers_prompt</span><span class="p">,</span>
+    <span class="n">get_system_questions_prompt</span><span class="p">,</span>
+    <span class="n">get_user_answers_prompt</span><span class="p">,</span>
+    <span class="n">get_user_questions_prompt</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+
+<div class="viewcode-block" id="make_questions">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.communication.make_questions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_questions</span><span class="p">(</span><span class="n">base_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate questions from a given text using the LLM.</span>
+
+<span class="sd">    This function sends the ``base_text`` to the configured Azure OpenAI model</span>
+<span class="sd">    with a system prompt designed to elicit factual yes/no questions. It</span>
+<span class="sd">    retrieves the global configuration and client instance to make the API call.</span>
+
+<span class="sd">    :param base_text: The text from which to generate questions.</span>
+<span class="sd">    :type base_text: str</span>
+<span class="sd">    :return: A JSON string containing the generated questions. Returns an empty</span>
+<span class="sd">             string if the model response content is empty.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    :raises openai.APIError: If the API call to the LLM fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_model</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">get_system_questions_prompt</span><span class="p">()</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">get_user_questions_prompt</span><span class="p">(</span><span class="n">base_text</span><span class="p">)</span>
+            <span class="p">},</span>
+        <span class="p">],</span>
+        <span class="n">max_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_temperature</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">questions_text</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span>
+    <span class="k">return</span> <span class="n">questions_text</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="evaluate_questions">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.communication.evaluate_questions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluate_questions</span><span class="p">(</span><span class="n">answer_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="n">questions_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate how well a text answers a list of questions using the LLM.</span>
+
+<span class="sd">    This function sends the ``answer_text`` and a JSON string of</span>
+<span class="sd">    ``questions_text`` to the configured Azure OpenAI model. The model is</span>
+<span class="sd">    prompted to answer each question based on the text and provide a numeric</span>
+<span class="sd">    score. The function parses the JSON response and returns the list of</span>
+<span class="sd">    answers. It also handles and warns about responses that might include</span>
+<span class="sd">    markdown ```json tags.</span>
+
+<span class="sd">    :param answer_text: The text to use for answering the questions.</span>
+<span class="sd">    :type answer_text: str</span>
+<span class="sd">    :param questions_text: A JSON string representing the list of questions.</span>
+<span class="sd">    :type questions_text: str</span>
+<span class="sd">    :return: A list of dictionaries, where each dictionary contains a</span>
+<span class="sd">             &#39;question&#39; and its corresponding &#39;answer&#39; score.</span>
+<span class="sd">    :rtype: list[dict[str, Any]]</span>
+<span class="sd">    :raises ValueError: If the LLM response is not valid JSON or cannot be parsed.</span>
+<span class="sd">    :raises openai.APIError: If the API call to the LLM fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_model</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">get_system_answers_prompt</span><span class="p">()</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">get_user_answers_prompt</span><span class="p">(</span><span class="n">answer_text</span><span class="p">,</span> <span class="n">questions_text</span><span class="p">),</span>
+            <span class="p">},</span>
+        <span class="p">],</span>
+        <span class="n">max_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_temperature</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">response_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># Some models, especially when instructed to return JSON, may wrap the output</span>
+    <span class="c1"># in markdown code blocks (e.g., ```json ... ```). This block of code</span>
+    <span class="c1"># robustly handles this by stripping the markers if they exist.</span>
+    <span class="k">if</span> <span class="s2">&quot;```json&quot;</span> <span class="ow">in</span> <span class="n">response_content</span><span class="p">:</span>
+        <span class="n">pytest</span><span class="o">.</span><span class="n">warns</span><span class="p">(</span>
+            <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Model is producing extra tags! The response will be parsed, but this may indicate model is not following instructions.&quot;</span>
+            <span class="p">))</span>
+        <span class="c1"># remove json tags</span>
+        <span class="n">response_content</span> <span class="o">=</span> <span class="n">response_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;```json&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">response_content</span> <span class="o">=</span> <span class="n">response_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">answers_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_content</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="c1"># The prompt asks for a specific structure: {&quot;list&quot;: [...]}.</span>
+        <span class="c1"># We safely extract the list, defaulting to an empty list if the key is missing.</span>
+        <span class="n">answers_list</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid JSON in evaluate_questions response: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">answers_list</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pytest-texts-score</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pytest_texts_score</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Patrik Vodila.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

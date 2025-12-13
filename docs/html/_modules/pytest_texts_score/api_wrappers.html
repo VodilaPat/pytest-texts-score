@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pytest_texts_score.api_wrappers &#8212; pytest-texts-score  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pytest_texts_score.api_wrappers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provides wrapper functions for the public API, offering alternative</span>
+<span class="sd">names for existing functionality. For example, functions using &#39;mean&#39; are</span>
+<span class="sd">aliased with &#39;average&#39;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytest_texts_score.api</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">texts_agg_f1_mean</span><span class="p">,</span>
+    <span class="n">texts_agg_precision_max</span><span class="p">,</span>
+    <span class="n">texts_agg_precision_mean</span><span class="p">,</span>
+    <span class="n">texts_agg_precision_median</span><span class="p">,</span>
+    <span class="n">texts_agg_precision_min</span><span class="p">,</span>
+    <span class="n">texts_agg_recall_max</span><span class="p">,</span>
+    <span class="n">texts_agg_recall_mean</span><span class="p">,</span>
+    <span class="n">texts_agg_recall_median</span><span class="p">,</span>
+    <span class="n">texts_agg_recall_min</span><span class="p">,</span>
+    <span class="n">texts_expect_precision_equal</span><span class="p">,</span>
+    <span class="n">texts_expect_precision_range</span><span class="p">,</span>
+    <span class="n">texts_expect_recall_equal</span><span class="p">,</span>
+    <span class="n">texts_expect_recall_range</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="texts_agg_f1_average">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_f1_average">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_f1_average</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                         <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                         <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                         <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                         <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_f1_mean.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_f1_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                      <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_precision_average">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_precision_average">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_precision_average</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_precision_mean.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_precision_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                             <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_recall_average">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_recall_average">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_recall_average</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                             <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                             <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                             <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_recall_mean.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_recall_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                          <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --- Completeness Wrappers (alias for Precision) ---</span>
+
+
+<div class="viewcode-block" id="texts_expect_completeness_equal">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_expect_completeness_equal">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_expect_completeness_equal</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">skip_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_expect_precision_equal.&quot;&quot;&quot;</span>
+    <span class="n">texts_expect_precision_equal</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span>
+                                 <span class="n">skip_warnings</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_expect_completeness_range">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_expect_completeness_range">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_expect_completeness_range</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">min_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">max_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">skip_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_expect_precision_range.&quot;&quot;&quot;</span>
+    <span class="n">texts_expect_precision_range</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">min_score</span><span class="p">,</span> <span class="n">max_score</span><span class="p">,</span>
+                                 <span class="n">skip_warnings</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_completeness_min">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_completeness_min">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_completeness_min</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                               <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                               <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                               <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_precision_min.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_precision_min</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                            <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_completeness_max">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_completeness_max">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_completeness_max</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                               <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                               <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                               <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_precision_max.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_precision_max</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                            <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_completeness_median">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_completeness_median">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_completeness_median</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                  <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                  <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                  <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                  <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                  <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                  <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_precision_median.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_precision_median</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                               <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_completeness_average">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_completeness_average">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_completeness_average</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                   <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                   <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                   <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_precision_average.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_precision_average</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                                <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_completeness_mean">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_completeness_mean">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_completeness_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_precision_mean.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_precision_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                             <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --- Correctness Wrappers (alias for Recall) ---</span>
+
+
+<div class="viewcode-block" id="texts_expect_correctness_equal">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_expect_correctness_equal">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_expect_correctness_equal</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">skip_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_expect_recall_equal.&quot;&quot;&quot;</span>
+    <span class="n">texts_expect_recall_equal</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">skip_warnings</span><span class="p">,</span>
+                              <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_expect_correctness_range">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_expect_correctness_range">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_expect_correctness_range</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">min_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">max_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">skip_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_expect_recall_range.&quot;&quot;&quot;</span>
+    <span class="n">texts_expect_recall_range</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">min_score</span><span class="p">,</span> <span class="n">max_score</span><span class="p">,</span>
+                              <span class="n">skip_warnings</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_correctness_min">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_correctness_min">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_correctness_min</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                              <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                              <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                              <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_recall_min.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_recall_min</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                         <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_correctness_max">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_correctness_max">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_correctness_max</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">upper_bound</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                              <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                              <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                              <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_recall_max.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_recall_max</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                         <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_correctness_median">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_correctness_median">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_correctness_median</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                 <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                 <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_recall_median.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_recall_median</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                            <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_correctness_average">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_correctness_average">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_correctness_average</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                  <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                  <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                  <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                                  <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                  <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                  <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_recall_average.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_recall_average</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                             <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_correctness_mean">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.texts_agg_correctness_mean">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_correctness_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                               <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                               <span class="n">max_delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+                               <span class="n">full_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                               <span class="n">each_question_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                               <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias for texts_agg_recall_mean.&quot;&quot;&quot;</span>
+    <span class="n">texts_agg_recall_mean</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="n">full_runs</span><span class="p">,</span>
+                          <span class="n">each_question_runs</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pytest-texts-score</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pytest_texts_score</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Patrik Vodila.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

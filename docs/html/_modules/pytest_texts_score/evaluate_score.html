@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pytest_texts_score.evaluate_score &#8212; pytest-texts-score  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pytest_texts_score.evaluate_score</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytest_texts_score.communication</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">evaluate_questions</span><span class="p">,</span>
+    <span class="n">make_questions</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statistics</span><span class="w"> </span><span class="kn">import</span> <span class="n">median</span><span class="p">,</span> <span class="n">mean</span>
+
+<span class="c1">#: The maximum number of times to retry an LLM call upon failure before raising an exception.</span>
+<span class="n">MAXIMAL_RETRY_ON_ERROR</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+<div class="viewcode-block" id="AggType">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.AggType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AggType</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregation types for recall scores.&quot;&quot;&quot;</span>
+
+    <span class="n">MINIMUM</span> <span class="o">=</span> <span class="s2">&quot;minimum&quot;</span>
+    <span class="n">MAXIMUM</span> <span class="o">=</span> <span class="s2">&quot;maximum&quot;</span>
+    <span class="n">MEDIAN</span> <span class="o">=</span> <span class="s2">&quot;median&quot;</span>
+    <span class="n">AVERAGE</span> <span class="o">=</span> <span class="s2">&quot;average&quot;</span>
+    <span class="n">MEAN</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span>  <span class="c1"># alias for average</span></div>
+
+
+
+<div class="viewcode-block" id="ScoreType">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.ScoreType">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScoreType</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="n">F1</span> <span class="o">=</span> <span class="s2">&quot;f1&quot;</span>
+    <span class="n">PRECISION</span> <span class="o">=</span> <span class="s2">&quot;precision&quot;</span>
+    <span class="n">RECALL</span> <span class="o">=</span> <span class="s2">&quot;recall&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="texts_evaluate_f1">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_evaluate_f1">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_evaluate_f1</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the F1 score between two texts.</span>
+
+<span class="sd">    This function computes the F1 score by first calculating the precision and</span>
+<span class="sd">    recall between the ``expected`` and ``given`` texts. It serves as a</span>
+<span class="sd">    single-run evaluation of the harmonic mean of precision and recall.</span>
+
+<span class="sd">    :param expected: The reference text.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text to be evaluated against the reference.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param retry_on_error: Whether to retry the LLM call on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The calculated F1 score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">texts_evaluate_precision</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="n">texts_evaluate_recall</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_evaluate_precision">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_evaluate_precision">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_evaluate_precision</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate the precision score of the given text against the expected text.</span>
+
+<span class="sd">    Precision is calculated by generating questions from the ``given`` text and</span>
+<span class="sd">    checking how well they are answered by the ``expected`` text. This measures</span>
+<span class="sd">    how much of the information in the ``given`` text is also present in the</span>
+<span class="sd">    ``expected`` text.</span>
+
+<span class="sd">    :param expected: The reference text used for answering questions.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text from which questions are generated.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param retry_on_error: Whether to retry the LLM call on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The calculated precision score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">score_one_side</span><span class="p">(</span><span class="n">given</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="o">=</span><span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_evaluate_recall">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_evaluate_recall">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_evaluate_recall</span><span class="p">(</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate the recall score of the given text against the expected text.</span>
+
+<span class="sd">    Recall is calculated by generating questions from the ``expected`` text and</span>
+<span class="sd">    checking how well they are answered by the ``given`` text. This measures</span>
+<span class="sd">    how much of the information in the ``expected`` text is covered by the</span>
+<span class="sd">    ``given`` text.</span>
+
+<span class="sd">    :param expected: The reference text from which questions are generated.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text used for answering questions.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param retry_on_error: Whether to retry the LLM call on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The calculated recall score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">score_one_side</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">given</span><span class="p">,</span> <span class="n">retry_on_error</span><span class="o">=</span><span class="n">retry_on_error</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_multiple_f1">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_multiple_f1">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_multiple_f1</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">generate_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">generate_answers_per_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">score_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform multiple evaluation runs to get a list of F1 scores.</span>
+
+<span class="sd">    This function runs the F1 score evaluation multiple times to account for</span>
+<span class="sd">    variability in LLM responses. It generates new sets of questions for</span>
+<span class="sd">    precision and recall in each ``generate_questions`` loop, and for each set,</span>
+<span class="sd">    it evaluates answers ``generate_answers_per_questions`` times.</span>
+
+<span class="sd">    :param expected: The reference text.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text to evaluate.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param generate_questions: The number of times to generate a new set of questions.</span>
+<span class="sd">    :type generate_questions: int</span>
+<span class="sd">    :param generate_answers_per_questions: The number of times to evaluate answers for each set of questions.</span>
+<span class="sd">    :type generate_answers_per_questions: int</span>
+<span class="sd">    :param score_only: If ``True``, returns only a list of F1 scores. If ``False``, returns a list of tuples with detailed run info. Defaults to ``True``.</span>
+<span class="sd">    :type score_only: bool</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: A list of F1 scores, or a list of tuples ``(question_run, answer_run, precision, recall, f1_score)``.</span>
+<span class="sd">    :rtype: list[float] | list[tuple[int, int, float, float, float]]</span>
+<span class="sd">    :raises Exception: If the operation fails after the maximum number of retries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function contains a retry mechanism. The outer loop iterates through `generate_questions`,</span>
+    <span class="c1"># creating new question sets. The inner `while True` loop handles retries for LLM calls</span>
+    <span class="c1"># within a single question set generation, providing resilience against transient network or API errors.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">retries</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">q_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generate_questions</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">question_text_precision</span> <span class="o">=</span> <span class="n">make_questions</span><span class="p">(</span><span class="n">given</span><span class="p">)</span>
+                <span class="n">question_text_recall</span> <span class="o">=</span> <span class="n">make_questions</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">a_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generate_answers_per_questions</span><span class="p">):</span>
+                    <span class="n">answers_list_precision</span> <span class="o">=</span> <span class="n">evaluate_questions</span><span class="p">(</span>
+                        <span class="n">expected</span><span class="p">,</span> <span class="n">question_text_precision</span><span class="p">)</span>
+                    <span class="n">score_value_counts</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">answers_list_precision</span>
+                    <span class="p">]</span>
+                    <span class="n">precision</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">score_value_counts</span><span class="p">)</span>
+
+                    <span class="n">answers_list_recall</span> <span class="o">=</span> <span class="n">evaluate_questions</span><span class="p">(</span>
+                        <span class="n">given</span><span class="p">,</span> <span class="n">question_text_recall</span><span class="p">)</span>
+                    <span class="n">score_value_counts</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">answers_list_recall</span>
+                    <span class="p">]</span>
+                    <span class="n">recall</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">score_only</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f1_score</span><span class="p">(</span><span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">q_i</span><span class="p">,</span> <span class="n">a_i</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span>
+                                        <span class="n">f1_score</span><span class="p">(</span><span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">)))</span>
+                <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">retry_on_error</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error on question_run=</span><span class="si">{</span><span class="n">q_i</span><span class="si">}</span><span class="s2">; retrying: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">retries</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">retries</span> <span class="o">&gt;</span> <span class="n">MAXIMAL_RETRY_ON_ERROR</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Operation failed after </span><span class="si">{</span><span class="n">retries</span><span class="si">}</span><span class="s2"> retries. Last error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+                <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="texts_multiple_precision">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_multiple_precision">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_multiple_precision</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">generate_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">generate_answers_per_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">score_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform multiple evaluation runs to get a list of precision scores.</span>
+
+<span class="sd">    This function runs the precision score evaluation multiple times. It</span>
+<span class="sd">    generates new sets of questions from the ``given`` text in each</span>
+<span class="sd">    ``generate_questions`` loop, and for each set, it evaluates answers</span>
+<span class="sd">    ``generate_answers_per_questions`` times using the ``expected`` text.</span>
+
+<span class="sd">    :param expected: The reference text for answering.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text to generate questions from.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param generate_questions: The number of times to generate a new set of questions.</span>
+<span class="sd">    :type generate_questions: int</span>
+<span class="sd">    :param generate_answers_per_questions: The number of times to evaluate answers for each set of questions.</span>
+<span class="sd">    :type generate_answers_per_questions: int</span>
+<span class="sd">    :param score_only: If ``True``, returns only a list of precision scores. If ``False``, returns a list of tuples with detailed run info. Defaults to ``True``.</span>
+<span class="sd">    :type score_only: bool</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: A list of precision scores, or a list of tuples ``(question_run, answer_run, precision)``.</span>
+<span class="sd">    :rtype: list[float] | list[tuple[int, int, float]]</span>
+<span class="sd">    :raises Exception: If the operation fails after the maximum number of retries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function contains a retry mechanism. The outer loop iterates through `generate_questions`,</span>
+    <span class="c1"># creating new question sets. The inner `while True` loop handles retries for LLM calls</span>
+    <span class="c1"># within a single question set generation.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">retries</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">q_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generate_questions</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">question_text_precision</span> <span class="o">=</span> <span class="n">make_questions</span><span class="p">(</span><span class="n">given</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">a_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generate_answers_per_questions</span><span class="p">):</span>
+                    <span class="n">answers_list_precision</span> <span class="o">=</span> <span class="n">evaluate_questions</span><span class="p">(</span>
+                        <span class="n">expected</span><span class="p">,</span> <span class="n">question_text_precision</span><span class="p">)</span>
+                    <span class="n">score_value_counts</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">answers_list_precision</span>
+                    <span class="p">]</span>
+                    <span class="n">precision</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">score_value_counts</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">score_only</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">precision</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">q_i</span><span class="p">,</span> <span class="n">a_i</span><span class="p">,</span> <span class="n">precision</span><span class="p">))</span>
+                <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">retry_on_error</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error on question_run=</span><span class="si">{</span><span class="n">q_i</span><span class="si">}</span><span class="s2">; retrying: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">retries</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">retries</span> <span class="o">&gt;</span> <span class="n">MAXIMAL_RETRY_ON_ERROR</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Operation failed after </span><span class="si">{</span><span class="n">retries</span><span class="si">}</span><span class="s2"> retries. Last error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+                <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="texts_multiple_recall">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_multiple_recall">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_multiple_recall</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">generate_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">generate_answers_per_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">score_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform multiple evaluation runs to get a list of recall scores.</span>
+
+<span class="sd">    This function runs the recall score evaluation multiple times. It generates</span>
+<span class="sd">    new sets of questions from the ``expected`` text in each</span>
+<span class="sd">    ``generate_questions`` loop, and for each set, it evaluates answers</span>
+<span class="sd">    ``generate_answers_per_questions`` times using the ``given`` text.</span>
+
+<span class="sd">    :param expected: The reference text to generate questions from.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text for answering.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param generate_questions: The number of times to generate a new set of questions.</span>
+<span class="sd">    :type generate_questions: int</span>
+<span class="sd">    :param generate_answers_per_questions: The number of times to evaluate answers for each set of questions.</span>
+<span class="sd">    :type generate_answers_per_questions: int</span>
+<span class="sd">    :param score_only: If ``True``, returns only a list of recall scores. If ``False``, returns a list of tuples with detailed run info. Defaults to ``True``.</span>
+<span class="sd">    :type score_only: bool</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: A list of recall scores, or a list of tuples ``(question_run, answer_run, recall)``.</span>
+<span class="sd">    :rtype: list[float] | list[tuple[int, int, float]]</span>
+<span class="sd">    :raises Exception: If the operation fails after the maximum number of retries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function contains a retry mechanism. The outer loop iterates through `generate_questions`,</span>
+    <span class="c1"># creating new question sets. The inner `while True` loop handles retries for LLM calls</span>
+    <span class="c1"># within a single question set generation.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">retries</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">q_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generate_questions</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">question_text_recall</span> <span class="o">=</span> <span class="n">make_questions</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">a_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">generate_answers_per_questions</span><span class="p">):</span>
+                    <span class="n">answers_list_recall</span> <span class="o">=</span> <span class="n">evaluate_questions</span><span class="p">(</span>
+                        <span class="n">given</span><span class="p">,</span> <span class="n">question_text_recall</span><span class="p">)</span>
+                    <span class="n">score_value_counts</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">answers_list_recall</span>
+                    <span class="p">]</span>
+                    <span class="n">recall</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">score_only</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">recall</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">q_i</span><span class="p">,</span> <span class="n">a_i</span><span class="p">,</span> <span class="n">recall</span><span class="p">))</span>
+                <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">retry_on_error</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error on question_run=</span><span class="si">{</span><span class="n">q_i</span><span class="si">}</span><span class="s2">; retrying: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">retries</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">retries</span> <span class="o">&gt;</span> <span class="n">MAXIMAL_RETRY_ON_ERROR</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Operation failed after </span><span class="si">{</span><span class="n">retries</span><span class="si">}</span><span class="s2"> retries. Last error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+                <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="score_one_side">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.score_one_side">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">score_one_side</span><span class="p">(</span><span class="n">base_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                   <span class="n">answer_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                   <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate a one-sided score by generating questions from one text and answering with another.</span>
+
+<span class="sd">    This is a fundamental building block for both precision and recall calculations.</span>
+<span class="sd">    It generates a set of questions based on ``base_text`` and then evaluates</span>
+<span class="sd">    how well ``answer_text`` can answer them. The final score is the average of</span>
+<span class="sd">    the answer scores. This process forms</span>
+<span class="sd">    the basis for calculating both precision and recall.</span>
+
+<span class="sd">    :param base_text: The text to generate questions from.</span>
+<span class="sd">    :type base_text: str</span>
+<span class="sd">    :param answer_text: The text to answer the questions with.</span>
+<span class="sd">    :type answer_text: str</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The average score from the evaluation.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    :raises Exception: If the operation fails after the maximum number of retries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This function includes a retry loop to handle transient errors during LLM communication,</span>
+    <span class="c1"># making the scoring process more robust.</span>
+    <span class="n">retries</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">qustions_text</span> <span class="o">=</span> <span class="n">make_questions</span><span class="p">(</span><span class="n">base_text</span><span class="p">)</span>
+            <span class="n">answers_list</span> <span class="o">=</span> <span class="n">evaluate_questions</span><span class="p">(</span><span class="n">answer_text</span><span class="p">,</span> <span class="n">qustions_text</span><span class="p">)</span>
+            <span class="c1"># questions_from_answers = [j.get(&#39;question&#39;) for j in answers_list]</span>
+            <span class="n">score_value_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">answers_list</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">retry_on_error</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error on scoring; retrying: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">retries</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">retries</span> <span class="o">&gt;</span> <span class="n">MAXIMAL_RETRY_ON_ERROR</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Operation failed after </span><span class="si">{</span><span class="n">retries</span><span class="si">}</span><span class="s2"> retries. Last error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+            <span class="k">continue</span></div>
+
+
+
+<div class="viewcode-block" id="scores_agg">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.scores_agg">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scores_agg</span><span class="p">(</span>
+    <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">agg_type</span><span class="p">:</span> <span class="n">AggType</span> <span class="o">|</span>
+    <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Aggregate a list of scores using a specified method.</span>
+
+<span class="sd">    This function takes a list of numeric scores and applies an aggregation</span>
+<span class="sd">    function (min, max, median, or mean/average) to produce a single</span>
+<span class="sd">    summary score.</span>
+
+<span class="sd">    :param scores: A list of scores to aggregate.</span>
+<span class="sd">    :type scores: list[float]</span>
+<span class="sd">    :param agg_type: The aggregation method to use.</span>
+<span class="sd">    :type agg_type: AggType | Literal[&quot;minimum&quot;, &quot;maximum&quot;, &quot;median&quot;, &quot;average&quot;, &quot;mean&quot;]</span>
+<span class="sd">    :return: The aggregated score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    :raises ValueError: If an unknown aggregation type is provided.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert string to enum if needed</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agg_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">agg_type</span> <span class="o">=</span> <span class="n">AggType</span><span class="p">(</span><span class="n">agg_type</span><span class="p">)</span>
+
+    <span class="c1"># Apply aggregation</span>
+    <span class="k">match</span> <span class="n">agg_type</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">AggType</span><span class="o">.</span><span class="n">MINIMUM</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
+
+        <span class="k">case</span> <span class="n">AggType</span><span class="o">.</span><span class="n">MAXIMUM</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
+
+        <span class="k">case</span> <span class="n">AggType</span><span class="o">.</span><span class="n">MEDIAN</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
+
+        <span class="k">case</span> <span class="n">AggType</span><span class="o">.</span><span class="n">AVERAGE</span> <span class="o">|</span> <span class="n">AggType</span><span class="o">.</span><span class="n">MEAN</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
+
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown aggregation type: </span><span class="si">{</span><span class="n">agg_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_f1">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_agg_f1">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_f1</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">generate_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">generate_answers_per_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">agg_type</span><span class="p">:</span> <span class="n">AggType</span> <span class="o">|</span>
+    <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">],</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate an aggregated F1 score over multiple runs.</span>
+
+<span class="sd">    This function first generates multiple F1 scores by calling</span>
+<span class="sd">    ``texts_multiple_f1`` and then aggregates these scores using the</span>
+<span class="sd">    specified ``agg_type``.</span>
+
+<span class="sd">    :param expected: The reference text.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text to evaluate.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param generate_questions: The number of times to generate a new set of questions.</span>
+<span class="sd">    :type generate_questions: int</span>
+<span class="sd">    :param generate_answers_per_questions: The number of times to evaluate answers for each set of questions.</span>
+<span class="sd">    :type generate_answers_per_questions: int</span>
+<span class="sd">    :param agg_type: The aggregation method to use on the collected scores.</span>
+<span class="sd">    :type agg_type: AggType | Literal[&quot;minimum&quot;, &quot;maximum&quot;, &quot;median&quot;, &quot;average&quot;, &quot;mean&quot;]</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The final aggregated F1 score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">texts_multiple_f1</span><span class="p">(</span>
+        <span class="n">expected</span><span class="o">=</span><span class="n">expected</span><span class="p">,</span>
+        <span class="n">given</span><span class="o">=</span><span class="n">given</span><span class="p">,</span>
+        <span class="n">generate_questions</span><span class="o">=</span><span class="n">generate_questions</span><span class="p">,</span>
+        <span class="n">generate_answers_per_questions</span><span class="o">=</span><span class="n">generate_answers_per_questions</span><span class="p">,</span>
+        <span class="n">score_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">retry_on_error</span><span class="o">=</span><span class="n">retry_on_error</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">scores_agg</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">agg_type</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_precision">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_agg_precision">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_precision</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">generate_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">generate_answers_per_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">agg_type</span><span class="p">:</span> <span class="n">AggType</span> <span class="o">|</span>
+    <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">],</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate an aggregated precision score over multiple runs.</span>
+
+<span class="sd">    This function first generates multiple precision scores by calling</span>
+<span class="sd">    ``texts_multiple_precision`` and then aggregates these scores using the</span>
+<span class="sd">    specified ``agg_type``.</span>
+
+<span class="sd">    :param expected: The reference text.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text to evaluate.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param generate_questions: The number of times to generate a new set of questions.</span>
+<span class="sd">    :type generate_questions: int</span>
+<span class="sd">    :param generate_answers_per_questions: The number of times to evaluate answers for each set of questions.</span>
+<span class="sd">    :type generate_answers_per_questions: int</span>
+<span class="sd">    :param agg_type: The aggregation method to use on the collected scores.</span>
+<span class="sd">    :type agg_type: AggType | Literal[&quot;minimum&quot;, &quot;maximum&quot;, &quot;median&quot;, &quot;average&quot;, &quot;mean&quot;]</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The final aggregated precision score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">texts_multiple_precision</span><span class="p">(</span>
+        <span class="n">expected</span><span class="o">=</span><span class="n">expected</span><span class="p">,</span>
+        <span class="n">given</span><span class="o">=</span><span class="n">given</span><span class="p">,</span>
+        <span class="n">generate_questions</span><span class="o">=</span><span class="n">generate_questions</span><span class="p">,</span>
+        <span class="n">generate_answers_per_questions</span><span class="o">=</span><span class="n">generate_answers_per_questions</span><span class="p">,</span>
+        <span class="n">score_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">retry_on_error</span><span class="o">=</span><span class="n">retry_on_error</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">scores_agg</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">agg_type</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="texts_agg_recall">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.texts_agg_recall">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">texts_agg_recall</span><span class="p">(</span>
+    <span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">given</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">generate_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">generate_answers_per_questions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">agg_type</span><span class="p">:</span> <span class="n">AggType</span> <span class="o">|</span>
+    <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;average&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">],</span>
+    <span class="n">retry_on_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate an aggregated recall score over multiple runs.</span>
+
+<span class="sd">    This function first generates multiple recall scores by calling</span>
+<span class="sd">    ``texts_multiple_recall`` and then aggregates these scores using the</span>
+<span class="sd">    specified ``agg_type``.</span>
+
+<span class="sd">    :param expected: The reference text.</span>
+<span class="sd">    :type expected: str</span>
+<span class="sd">    :param given: The text to evaluate.</span>
+<span class="sd">    :type given: str</span>
+<span class="sd">    :param generate_questions: The number of times to generate a new set of questions.</span>
+<span class="sd">    :type generate_questions: int</span>
+<span class="sd">    :param generate_answers_per_questions: The number of times to evaluate answers for each set of questions.</span>
+<span class="sd">    :type generate_answers_per_questions: int</span>
+<span class="sd">    :param agg_type: The aggregation method to use on the collected scores.</span>
+<span class="sd">    :type agg_type: AggType | Literal[&quot;minimum&quot;, &quot;maximum&quot;, &quot;median&quot;, &quot;average&quot;, &quot;mean&quot;]</span>
+<span class="sd">    :param retry_on_error: Whether to retry LLM calls on failure. Defaults to ``True``.</span>
+<span class="sd">    :type retry_on_error: bool</span>
+<span class="sd">    :return: The final aggregated recall score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">texts_multiple_recall</span><span class="p">(</span>
+        <span class="n">expected</span><span class="o">=</span><span class="n">expected</span><span class="p">,</span>
+        <span class="n">given</span><span class="o">=</span><span class="n">given</span><span class="p">,</span>
+        <span class="n">generate_questions</span><span class="o">=</span><span class="n">generate_questions</span><span class="p">,</span>
+        <span class="n">generate_answers_per_questions</span><span class="o">=</span><span class="n">generate_answers_per_questions</span><span class="p">,</span>
+        <span class="n">score_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">retry_on_error</span><span class="o">=</span><span class="n">retry_on_error</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">scores_agg</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">agg_type</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="f1_score">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.evaluate_score.f1_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">f1_score</span><span class="p">(</span><span class="n">precision</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">recall</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the F1 score from precision and recall.</span>
+
+<span class="sd">    Computes the harmonic mean of precision and recall. Returns 0 if both</span>
+<span class="sd">    precision and recall are 0 to avoid division by zero.</span>
+
+<span class="sd">    :param precision: The precision score (between 0.0 and 1.0).</span>
+<span class="sd">    :type precision: float</span>
+<span class="sd">    :param recall: The recall score (between 0.0 and 1.0).</span>
+<span class="sd">    :type recall: float</span>
+<span class="sd">    :return: The F1 score.</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Guard against division by zero if both precision and recall are 0.</span>
+    <span class="k">if</span> <span class="n">precision</span> <span class="o">+</span> <span class="n">recall</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">precision</span> <span class="o">*</span> <span class="n">recall</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">precision</span> <span class="o">+</span> <span class="n">recall</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pytest-texts-score</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pytest_texts_score</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Patrik Vodila.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

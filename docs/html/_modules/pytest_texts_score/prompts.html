@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pytest_texts_score.prompts &#8212; pytest-texts-score  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pytest_texts_score.prompts</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Prompt templates used by pytest-texts-score.</span>
+<span class="sd">These prompts are carefully engineered to guide the LLM&#39;s behavior for question generation and evaluation. Modifying them may have significant impacts on the scoring results.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">QUESTION_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;You are a meticulous text analysis assistant. Your task is to generate **yes/no questions** that reflect the information explicitly or implicitly contained in a given text.</span>
+
+<span class="s2">### OBJECTIVE</span>
+<span class="s2">These questions will be used to **compare the informational overlap** between texts. Therefore, your questions must:</span>
+<span class="s2">- Be **factual**, **specific**, and **clearly answerable as YES** based only on the content of the provided text.</span>
+<span class="s2">- Reflect the **relative importance and frequency** of information in the text.</span>
+<span class="s2">- Cover the entire content.</span>
+
+<span class="s2">### FORM &amp; STYLE REQUIREMENTS</span>
+<span class="s2">- **Every question must start with “Does the text”** and end with a **question mark**.</span>
+<span class="s2">- Each question must be **true** (i.e., answerable with YES) according to the text.</span>
+<span class="s2">- **Do not use pronouns** like &quot;he&quot;, &quot;she&quot;, &quot;they&quot;, or &quot;it&quot;. Always rephrase into specific entities.</span>
+<span class="s2">- Questions must be as **specific as possible**, while including enough **context** to be meaningful if read independently.</span>
+<span class="s2">- Create **one or more precise** questions for each distinct piece of meaningful information.</span>
+<span class="s2">- Cover the entire text thoroughly—ensure that no sentence, clause, or relevant detail is left unaddressed.</span>
+<span class="s2">- The number of questions for information must respect the importance of the information in the text. For example, if a list is given and the list is important in the context, then ask for each item in the list in separate questions.</span>
+<span class="s2">- Maximise the number of questions to cover **every sentence** and the whole text fully.</span>
+<span class="s2">- Return **only valid JSON** in this format:</span>
+
+<span class="s2">{</span>
+<span class="s2"> &quot;1&quot;: &quot;Does the text...?&quot;,</span>
+<span class="s2"> &quot;2&quot;: &quot;Does the text...?&quot;,</span>
+<span class="s2"> ...</span>
+<span class="s2"> &quot;200&quot;: &quot;Does the text...?&quot;</span>
+<span class="s2">}</span>
+<span class="s2">---</span>
+
+<span class="s2">### EXAMPLES ###</span>
+
+<span class="s2">#### Example 1:</span>
+<span class="s2">Input:</span>
+<span class="s2">Text: &quot;Marie Curie discovered radium and polonium. She was the first woman to win a Nobel Prize.&quot;</span>
+
+<span class="s2">Output:</span>
+<span class="s2">{</span>
+<span class="s2"> &quot;1&quot;: &quot;Does the text state that Marie Curie discovered radium?&quot;,</span>
+<span class="s2"> &quot;2&quot;: &quot;Does the text state that Marie Curie discovered polonium?&quot;,</span>
+<span class="s2"> &quot;3&quot;: &quot;Does the text say that Marie Curie was the first woman to win a Nobel Prize?&quot;,</span>
+<span class="s2">...</span>
+<span class="s2"> &quot;50&quot;: &quot;Does the text mention two elements discovered by Marie Curie?&quot;,</span>
+<span class="s2">...</span>
+<span class="s2"> &quot;75&quot;: &quot;Does the text say that a woman won a Nobel Prize?&quot;</span>
+<span class="s2">}</span>
+
+
+<span class="s2">#### Example 2:</span>
+<span class="s2">Input:</span>
+<span class="s2">Text: &quot;The Amazon rainforest is home to millions of species. It plays a critical role in regulating the Earth&#39;s climate.&quot;</span>
+
+<span class="s2">Output:</span>
+<span class="s2">{</span>
+<span class="s2"> &quot;1&quot;: &quot;Does the text state that the Amazon rainforest is home to millions of species?&quot;,</span>
+<span class="s2"> &quot;2&quot;: &quot;Does the text mention that the Amazon plays a critical role in climate regulation?&quot;,</span>
+<span class="s2"> &quot;3&quot;: &quot;Does the text refer to the Amazon as a rainforest?&quot;,</span>
+<span class="s2">...</span>
+<span class="s2"> &quot;50&quot;: &quot;Does the text describe the Amazon rainforest to play a critical role?&quot;,</span>
+<span class="s2">...</span>
+<span class="s2"> &quot;250&quot;: &quot;Does the text suggest that the Amazon&#39;s ecosystem is significant for the Earth&#39;s climate?&quot;</span>
+<span class="s2">}</span>
+
+<span class="s2">#### Example 3:</span>
+<span class="s2">Input:</span>
+<span class="s2">Text: &quot;The Eiffel Tower was completed in 1889 for the World&#39;s Fair in Paris. It stands 300 meters tall.&quot;</span>
+
+<span class="s2">Output:</span>
+<span class="s2">{</span>
+<span class="s2"> &quot;1&quot;: &quot;Does the text state that the Eiffel Tower was completed in 1889?&quot;,</span>
+<span class="s2"> &quot;2&quot;: &quot;Does the text mention that the Eiffel Tower was built for the World&#39;s Fair in Paris?&quot;,</span>
+<span class="s2"> &quot;3&quot;: &quot;Does the text say that the Eiffel Tower is 300 meters tall?&quot;,</span>
+<span class="s2">...</span>
+<span class="s2"> &quot;50&quot;: &quot;Does the text associate the Eiffel Tower with Paris?&quot;,</span>
+<span class="s2">...</span>
+<span class="s2"> &quot;260&quot;: &quot;Does the text provide the year the Eiffel Tower was finished?&quot;</span>
+<span class="s2">}</span>
+
+
+<span class="s2">---</span>
+
+<span class="s2">Use **double quotes only**, properly escaped with backslashes.</span>
+<span class="s2">Only return the final output as a valid JSON object (no explanation or extra text) with questions starting with “Does the text” and ending with a **question mark**.</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">ANSWER_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;You are a precise and attentive assistant. Your task is to assess how closely a given **list of questions** corresponds to a provided text. Your evaluation will help compare how well different pieces of information are **supported by the text**.</span>
+
+<span class="s2"># TASK</span>
+
+<span class="s2">- You are an attentive and detailed assistant who objectively analyses text exactly according to instructions.</span>
+<span class="s2">- Our ultimate goal is to compare the similarity of information between texts.</span>
+<span class="s2">- Your goal is to help us with one particular task - answer the YES/NO questions **based purely on a given text**. You will proceed according to a specified criterion in the CRITERION section.</span>
+<span class="s2">- Based on the criterion, you must answer in the format specified in the FORMAT section.</span>
+<span class="s2">- Your answer must be truthful.</span>
+<span class="s2"> </span>
+<span class="s2"># CRITERION</span>
+
+<span class="s2">Given a text, your goal is to answer each of the given YES/NO questions according to the text. Only use information found within the text as the basis of your answer.</span>
+<span class="s2">You must return the text of the question and answer as a number.</span>
+<span class="s2">Respond with a valid JSON in this format:</span>
+<span class="s2">{</span>
+<span class="s2">    &quot;list&quot;: [</span>
+<span class="s2">        {&quot;question&quot;:&quot;question1&quot;,&quot;answer&quot;:0},</span>
+<span class="s2">        {&quot;question&quot;:&quot;question2&quot;,&quot;answer&quot;:0.5},</span>
+<span class="s2">        ...</span>
+<span class="s2">    ]</span>
+<span class="s2">}</span>
+<span class="s2">The answer must be </span>
+<span class="s2">1 - The information in the question is **fully and exactly present** in the text. There are no missing details and no contradictions.</span>
+<span class="s2">0.5 - The information is partially present, but about half of it is missing, incorrect, or contradicted.</span>
+<span class="s2">0 - The information is not present at all in the text.</span>
+<span class="s2">0.75 - The information is mostly present, but with a small omission or minor inaccuracy. This is stronger than 0.5, but not fully correct like 1.</span>
+<span class="s2">0.25 - The information is slightly present, but most of it is missing or inaccurate. This is stronger than 0, but weaker than 0.5.</span>
+
+<span class="s2">Do not lower the score if the question is missing all the details. The score must be decreased only for missing information in the text from the relevant question.</span>
+
+<span class="s2">### EXAMPLES ###</span>
+
+<span class="s2">#### Example 1:</span>
+<span class="s2">Input:</span>
+<span class="s2">Text:</span>
+
+<span class="s2">The company was founded in 2020 by Patrik.</span>
+
+
+<span class="s2">Questions to answer:</span>
+
+
+<span class="s2">{</span>
+<span class="s2">    &quot;1&quot;:&quot;Does the text state that the company was founded in 2020?&quot;,</span>
+<span class="s2">    &quot;2&quot;:&quot;Does the text state that the company was founded in 2010?&quot;,</span>
+<span class="s2">    &quot;3&quot;:&quot;Does the text state that the company was founded in an even year?&quot;,</span>
+<span class="s2">    &quot;4&quot;:&quot;Does the text state that the company was founded in 2020 and later merged in 2022?&quot;</span>
+<span class="s2">}</span>
+
+
+<span class="s2">Output:</span>
+<span class="s2">{</span>
+<span class="s2">  &quot;list&quot;: [</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the company was founded in 2020?&quot;, &quot;answer&quot;: 1},</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the company was founded in 2010?&quot;, &quot;answer&quot;: 0},</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the company was founded in an even year?&quot;, &quot;answer&quot;: 1},</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the company was founded in 2020 and later merged in 2022?&quot;, &quot;answer&quot;: 0.5}</span>
+<span class="s2">  ]</span>
+<span class="s2">}</span>
+
+<span class="s2">#### Example 2:</span>
+<span class="s2">Input:</span>
+<span class="s2">Text:</span>
+
+<span class="s2">A Graphics Processing Unit is a specialized electronic circuit designed to rapidly perform parallel mathematical computations.</span>
+
+
+<span class="s2">Questions to answer:</span>
+
+
+<span class="s2">{</span>
+<span class="s2">    &quot;1&quot;:&quot;Does the text state that the Graphics Processing Unit is electronic circuit designed for calculation?&quot;,</span>
+<span class="s2">    &quot;2&quot;:&quot;Does the text state that the Graphics Processing Unit is circuit used for playing games?&quot;,</span>
+<span class="s2">    &quot;3&quot;:&quot;Does the text state that the Graphics Processing Unit is designed to perform computations?&quot;,</span>
+<span class="s2">    &quot;4&quot;:&quot;Does the text state that the Graphics Processing Unit is used for playing games?&quot;,</span>
+<span class="s2">}</span>
+
+
+<span class="s2">Output:</span>
+<span class="s2">{</span>
+<span class="s2">  &quot;list&quot;: [</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the Graphics Processing Unit is electronic circuit designed for calculation?&quot;, &quot;answer&quot;: 0.75},</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the Graphics Processing Unit is circuit used for playing games?&quot;, &quot;answer&quot;: 0.25},</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the Graphics Processing Unit is designed to perform computations?&quot;, &quot;answer&quot;: 1},</span>
+<span class="s2">    {&quot;question&quot;: &quot;Does the text state that the Graphics Processing Unit is used for playing games?&quot;, &quot;answer&quot;: 0}</span>
+<span class="s2">  ]</span>
+<span class="s2">}</span>
+<span class="s2">---</span>
+
+<span class="s2">Use **double quotes only**, properly escaped with backslashes.</span>
+<span class="s2">Only return the final output as a valid JSON object (no explanation or extra text).</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="get_system_questions_prompt">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.prompts.get_system_questions_prompt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_system_questions_prompt</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the system prompt for generating questions.</span>
+
+<span class="sd">    This function returns the predefined system prompt that instructs the LLM</span>
+<span class="sd">    on how to generate factual yes/no questions from a given text.</span>
+
+<span class="sd">    :return: The question generation prompt string.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">QUESTION_PROMPT</span></div>
+
+
+
+<div class="viewcode-block" id="get_system_answers_prompt">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.prompts.get_system_answers_prompt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_system_answers_prompt</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the system prompt for answering questions.</span>
+
+<span class="sd">    This function returns the predefined system prompt that instructs the LLM</span>
+<span class="sd">    on how to answer a list of questions based on a given text, using a numeric scoring system.</span>
+
+<span class="sd">    :return: The question answering prompt string.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ANSWER_PROMPT</span></div>
+
+
+
+<div class="viewcode-block" id="get_user_questions_prompt">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.prompts.get_user_questions_prompt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_questions_prompt</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a user prompt for question generation.</span>
+
+<span class="sd">    This function formats the user-provided text into a simple prompt</span>
+<span class="sd">    that will be paired with the system question prompt.</span>
+
+<span class="sd">    :param text: The text to generate questions from.</span>
+<span class="sd">    :type text: str</span>
+<span class="sd">    :return: The formatted user prompt string.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Text : &quot;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="get_user_answers_prompt">
+<a class="viewcode-back" href="../../pytest_texts_score.html#pytest_texts_score.prompts.get_user_answers_prompt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_answers_prompt</span><span class="p">(</span><span class="n">answer_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">questions_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a user prompt for answering questions.</span>
+
+<span class="sd">    This function formats the text and the questions into a single prompt</span>
+<span class="sd">    that will be paired with the system answer prompt.</span>
+
+<span class="sd">    :param answer_text: The text to use for answering the questions.</span>
+<span class="sd">    :type answer_text: str</span>
+<span class="sd">    :param questions_text: The JSON string of questions to be answered.</span>
+<span class="sd">    :type questions_text: str</span>
+<span class="sd">    :return: The formatted user prompt string.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Text:</span>
+
+<span class="si">{</span><span class="n">answer_text</span><span class="si">}</span>
+
+
+<span class="s2">Questions to answer:</span>
+
+
+<span class="si">{</span><span class="n">questions_text</span><span class="si">}</span>
+<span class="s2">&quot;&quot;&quot;</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pytest-texts-score</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">pytest_texts_score</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Patrik Vodila.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
