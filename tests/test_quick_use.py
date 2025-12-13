@@ -22,7 +22,6 @@ def test_texts_compare_fixture(pytester):
         f'--llm-deployment={config._llm_deployment}',
         f'--llm-model={config._llm_model}',
         f'--llm-api-version={config._llm_api_version}',
-        f'--llm-temperature={config._llm_temperature}',
         f'--llm-max-tokens={config._llm_max_tokens}',
     )
 
@@ -61,7 +60,6 @@ def test_import(pytester):
         f'--llm-deployment={config._llm_deployment}',
         f'--llm-model={config._llm_model}',
         f'--llm-api-version={config._llm_api_version}',
-        f'--llm-temperature={config._llm_temperature}',
         f'--llm-max-tokens={config._llm_max_tokens}',
     )
 

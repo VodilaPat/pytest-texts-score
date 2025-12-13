@@ -397,7 +397,6 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">qustions_text</span> <span class="o">=</span> <span class="n">make_questions</span><span class="p">(</span><span class="n">base_text</span><span class="p">)</span>
             <span class="n">answers_list</span> <span class="o">=</span> <span class="n">evaluate_questions</span><span class="p">(</span><span class="n">answer_text</span><span class="p">,</span> <span class="n">qustions_text</span><span class="p">)</span>
-            <span class="c1"># questions_from_answers = [j.get(&#39;question&#39;) for j in answers_list]</span>
             <span class="n">score_value_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">answers_list</span><span class="p">]</span>
             <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">score_value_counts</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>

@@ -80,13 +80,6 @@
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Deployment name for the Azure LLM (overrides ini)&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">group</span><span class="o">.</span><span class="n">addoption</span><span class="p">(</span>
-        <span class="s2">&quot;--llm-temperature&quot;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Temperature for LLM responses (overrides ini, default: 0)&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">group</span><span class="o">.</span><span class="n">addoption</span><span class="p">(</span>
         <span class="s2">&quot;--llm-max-tokens&quot;</span><span class="p">,</span>
         <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -111,9 +104,6 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">addini</span><span class="p">(</span><span class="s2">&quot;llm_model&quot;</span><span class="p">,</span> <span class="s2">&quot;Azure model indetifier&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="c1"># With defaults</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">addini</span><span class="p">(</span><span class="s2">&quot;llm_api_version&quot;</span><span class="p">,</span> <span class="s2">&quot;API version&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;2024-05-01&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">addini</span><span class="p">(</span><span class="s2">&quot;llm_temperature&quot;</span><span class="p">,</span>
-                  <span class="s2">&quot;Temperature for LLM responses&quot;</span><span class="p">,</span>
-                  <span class="n">default</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">addini</span><span class="p">(</span><span class="s2">&quot;llm_max_tokens&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;Maximum tokens for LLM responses&quot;</span><span class="p">,</span>
                   <span class="n">default</span><span class="o">=</span><span class="s2">&quot;8192&quot;</span><span class="p">)</span></div>
@@ -151,10 +141,6 @@
     <span class="n">config</span><span class="o">.</span><span class="n">_llm_model</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">getoption</span><span class="p">(</span><span class="s2">&quot;--llm-model&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">getini</span><span class="p">(</span>
         <span class="s2">&quot;llm_model&quot;</span><span class="p">)</span>
 
-    <span class="n">config</span><span class="o">.</span><span class="n">_llm_temperature</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">getoption</span><span class="p">(</span><span class="s2">&quot;--llm-temperature&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">_llm_temperature</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">getini</span><span class="p">(</span><span class="s2">&quot;llm_temperature&quot;</span><span class="p">))</span>
-
     <span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">getoption</span><span class="p">(</span><span class="s2">&quot;--llm-max-tokens&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">getini</span><span class="p">(</span><span class="s2">&quot;llm_max_tokens&quot;</span><span class="p">))</span>
@@ -166,7 +152,6 @@
             <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_endpoint</span><span class="p">,</span>
             <span class="s2">&quot;api_version&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_api_version</span><span class="p">,</span>
             <span class="s2">&quot;deployment&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_deployment</span><span class="p">,</span>
-            <span class="c1"># &quot;temperature&quot;: config._llm_temperature,</span>
             <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span><span class="p">,</span>
             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">_llm_model</span><span class="p">,</span>
         <span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span>
@@ -230,7 +215,6 @@
             <span class="sa">f</span><span class="s2">&quot;deployment=</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_deployment</span><span class="si">!r}</span><span class="s2">, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;api_version=</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_api_version</span><span class="si">!r}</span><span class="s2">, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;api_key=</span><span class="si">{</span><span class="n">mask_api_key</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_api_key</span><span class="p">)</span><span class="si">}</span><span class="s2">, &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;temperature=</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_temperature</span><span class="si">}</span><span class="s2">, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;max_tokens=</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_max_tokens</span><span class="si">}</span><span class="s2">, &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;model=</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">_llm_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 

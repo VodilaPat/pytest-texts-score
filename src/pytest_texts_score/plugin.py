@@ -45,13 +45,6 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Deployment name for the Azure LLM (overrides ini)",
     )
     group.addoption(
-        "--llm-temperature",
-        action="store",
-        default=None,
-        type=float,
-        help="Temperature for LLM responses (overrides ini, default: 0)",
-    )
-    group.addoption(
         "--llm-max-tokens",
         action="store",
         default=None,
@@ -76,9 +69,6 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addini("llm_model", "Azure model indetifier", default=None)
     # With defaults
     parser.addini("llm_api_version", "API version", default="2024-05-01")
-    parser.addini("llm_temperature",
-                  "Temperature for LLM responses",
-                  default="0")
     parser.addini("llm_max_tokens",
                   "Maximum tokens for LLM responses",
                   default="8192")
@@ -113,10 +103,6 @@ def pytest_configure(config: pytest.Config) -> None:
     config._llm_model = config.getoption("--llm-model") or config.getini(
         "llm_model")
 
-    config._llm_temperature = config.getoption("--llm-temperature")
-    if config._llm_temperature is None:
-        config._llm_temperature = float(config.getini("llm_temperature"))
-
     config._llm_max_tokens = config.getoption("--llm-max-tokens")
     if config._llm_max_tokens is None:
         config._llm_max_tokens = int(config.getini("llm_max_tokens"))
@@ -128,7 +114,6 @@ def pytest_configure(config: pytest.Config) -> None:
             "endpoint": config._llm_endpoint,
             "api_version": config._llm_api_version,
             "deployment": config._llm_deployment,
-            # "temperature": config._llm_temperature,
             "max_tokens": config._llm_max_tokens,
             "model": config._llm_model,
         }.items() if not value
@@ -186,7 +171,6 @@ def pytest_report_header(config: pytest.Config) -> str:
             f"deployment={config._llm_deployment!r}, "
             f"api_version={config._llm_api_version!r}, "
             f"api_key={mask_api_key(config._llm_api_key)}, "
-            f"temperature={config._llm_temperature}, "
             f"max_tokens={config._llm_max_tokens}, "
             f"model={config._llm_model}")
 

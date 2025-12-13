@@ -72,8 +72,5 @@ target/
 # pyenv
 .python-version
 
-# Custom
-TODOs.md
-
 # pytest.ini with secrets
 pytest.ini

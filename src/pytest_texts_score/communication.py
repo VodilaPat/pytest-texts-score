@@ -41,7 +41,7 @@ def make_questions(base_text: str) -> str:
             },
         ],
         max_tokens=config._llm_max_tokens,
-        temperature=config._llm_temperature,
+        temperature=0,
     )
     questions_text = response.choices[0].message.content
     return questions_text or ""
@@ -84,7 +84,7 @@ def evaluate_questions(answer_text: str,
             },
         ],
         max_tokens=config._llm_max_tokens,
-        temperature=config._llm_temperature,
+        temperature=0,
     )
     response_content = response.choices[0].message.content or ""
 

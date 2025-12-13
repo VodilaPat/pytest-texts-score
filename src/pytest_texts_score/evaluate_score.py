@@ -338,7 +338,6 @@ def score_one_side(base_text: str,
         try:
             qustions_text = make_questions(base_text)
             answers_list = evaluate_questions(answer_text, qustions_text)
-            # questions_from_answers = [j.get('question') for j in answers_list]
             score_value_counts = [j.get("answer") for j in answers_list]
             return sum(score_value_counts) / len(score_value_counts)
         except Exception as e:

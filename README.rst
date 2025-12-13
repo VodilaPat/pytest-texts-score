@@ -72,7 +72,6 @@ Required settings
 Optional settings
 ~~~~~~~~~~~~~~~~~
 
-* ``llm-temperature`` — Sampling temperature (default: ``0``)
 * ``llm-max-tokens`` — Maximum response tokens (default: ``8192``)
 
 Example ``pytest.ini``
@@ -86,7 +85,6 @@ Example ``pytest.ini``
     llm_api_version = 2024-05-01
     llm_deployment = your-deployment
     llm_model = gpt-4
-    llm_temperature = 0
     llm_max_tokens = 8192
 
 Override any value via CLI:
