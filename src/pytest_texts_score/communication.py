@@ -93,7 +93,7 @@ def evaluate_questions(answer_text: str,
     # robustly handles this by stripping the markers if they exist.
     if "```json" in response_content:
         pytest.warns(
-            Exception(
+            UserWarning(
                 "Model is producing extra tags! The response will be parsed, but this may indicate model is not following instructions."
             ))
         # remove json tags
