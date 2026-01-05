@@ -14,7 +14,7 @@ pytest-texts-score
     :target: https://github.com/VodilaPat/pytest-texts-score/actions/workflows/pypi.yml
     :alt: Build Status
 
-A **pytest plugin for semantic text similarity scoring** using Large Language Models (LLMs).
+A **pytest plugin for semantic text comparsion scoring** using Large Language Models (LLMs).
 
 It enables robust assertions over *meaning*, not surface text, making it ideal for validating
 LLM outputs, RAG systems, summaries, and other generated content.
