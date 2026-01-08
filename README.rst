@@ -91,7 +91,7 @@ Override any value via CLI:
 
 ::
 
-    pytest --llm-temperature=0.5
+    pytest --llm_max_tokens=8192
 
 ----
 
